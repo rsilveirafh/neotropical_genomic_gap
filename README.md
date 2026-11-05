@@ -103,7 +103,7 @@ The scripts can be run from any folder. Results go to `outputs/`:
 | `outputs/region_outputs/Neotropics/sampling_by_family_Neotropics_unique.csv` | Table S2 |
 | `outputs/region_outputs/Neotropics/sampling_country_by_group_Neotropics.csv` | Table S3 |
 | `outputs/region_outputs/Neotropics/sampling_country_by_family_Neotropics.csv` | Table S4 |
-| `outputs/region_outputs/Neotropics/assembly_levels_by_group_Neotropics.csv` | Table S5 |
+| `outputs/assembly_levels_by_group_neotropics.csv` | Table S5 |
 | `outputs/region_outputs/Neotropics/map_country_group_3x2_Neotropics_quantiles.tif` | Figure 4 |
 | `outputs/region_outputs/Neotropics/plot_sampling_by_family_<group>.png` | Figures S1–S5 |
 

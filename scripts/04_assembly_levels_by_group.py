@@ -2,60 +2,67 @@
 # -*- coding: utf-8 -*-
 
 """
-Tabela S5: nível de montagem dos genomas das espécies neotropicais, por grupo.
+Tabela S5: nível de montagem (melhor montagem por espécie) das espécies neotropicais, por grupo.
+Também gera a mesma contagem para o mundo todo (assembly_levels_by_group_global.csv).
 
-Para cada espécie (chave do GBIF, `usageKey`) que ocorre em pelo menos um país neotropical
-e tem genoma, toma a MELHOR montagem disponível no NCBI:
-    Contig < Scaffold < Chromosome (Complete Genome conta como Chromosome)
-e conta quantas espécies de cada grupo ficam em cada nível.
-
-Usa a mesma definição de Neotrópico e a mesma unidade (usageKey) da Tabela S1
-(01_coverage_by_region.py), de modo que n_species_with_genome bate com a S1.
-
-Entradas (data/inputs/):
-    species_country_filtered_clean.tsv   usageKey, parent_name, iso2, species
-    famscan_all_assemblies_filtered.tsv  Organism Name, Assembly Level
-
-Saída:
-    outputs/region_outputs/Neotropics/assembly_levels_by_group_Neotropics.csv
-
-Nota: a versão anterior desta tabela (enviada à revista em 2025) incluía as Ilhas Malvinas (FK)
-no Neotrópico e contava espécies pelo nome, não pela chave do GBIF; por isso dava 730 aves e
-297 mamíferos com genoma, contra 727 e 293 na Tabela S1.
+Entradas: data/inputs/famscan_all_assemblies_filtered.tsv e species_country_filtered_clean.tsv
+Saídas:   outputs/assembly_levels_by_group_neotropics.csv (Tabela S5)
+          outputs/assembly_levels_by_group_global.csv
 """
 
 import sys
-from pathlib import Path
-
 import pandas as pd
+from pathlib import Path
 
 if hasattr(sys.stdout, "reconfigure"):
     sys.stdout.reconfigure(encoding="utf-8")
 
-REPO_DIR = Path(__file__).resolve().parents[1]
-INPUT_DIR = REPO_DIR / "data" / "inputs"
-OUT_DIR = REPO_DIR / "outputs" / "region_outputs" / "Neotropics"
+# =========================
+# Parâmetros gerais
+# =========================
 
-# Mesma lista de 01_coverage_by_region.py
-NEOTROPICAL_ISO2 = {
+# Caminhos relativos à raiz do repositório (o script roda de qualquer pasta)
+REPO_DIR = Path(__file__).resolve().parents[1]
+PATH_BASE = REPO_DIR / "data" / "inputs"
+OUTPUT_DIR = REPO_DIR / "outputs"
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+
+# Países da região Neotropical (ISO2)
+NEOTROPICAL_ISO2 = set([
     # Mesoamérica
     "MX", "BZ", "CR", "GT", "HN", "NI", "PA", "SV",
     # Caribe
     "CU", "DO", "HT", "PR", "JM", "TT", "BB", "BS",
     "AG", "LC", "GD", "VC", "DM",
     # América do Sul
-    "AR", "BO", "BR", "CL", "CO", "EC", "GF",
+    "AR", "BO", "BR", "CL", "CO", "EC", "FK", "GF",
     "GY", "PE", "PY", "SR", "UY", "VE",
-}
+])
 
-TETRAPOD_GROUPS = ["Amphibia", "Aves", "Mammalia", "Lepidosauria", "Testudines", "Crocodylia"]
+# Grupos focais (Tetrapoda)
+TETRAPOD_GROUPS = [
+    "Amphibia",
+    "Aves",
+    "Mammalia",
+    "Lepidosauria",
+    "Testudines",
+    "Crocodylia",
+]
 
-LEVEL_RANK = {"Contig": 1, "Scaffold": 2, "Chromosome": 3}
-RANK_LEVEL = {v: k for k, v in LEVEL_RANK.items()}
 
+# =========================
+# Funções auxiliares
+# =========================
 
-def simplify_assembly_level(raw):
-    """'Complete Genome' entra em 'Chromosome'."""
+def simplify_assembly_level(raw: str):
+    """
+    Mapeia o texto de 'Assembly Level' para:
+    - 'Contig'
+    - 'Scaffold'
+    - 'Chromosome'
+
+    'Complete Genome' entra em 'Chromosome'.
+    """
     if not isinstance(raw, str):
         return None
     lvl = raw.strip().lower()
@@ -68,38 +75,192 @@ def simplify_assembly_level(raw):
     return None
 
 
-def main():
-    asm = pd.read_csv(INPUT_DIR / "famscan_all_assemblies_filtered.tsv", sep="\t")
-    asm["species"] = asm["Organism Name"].astype(str).str.strip()
-    asm["rank"] = asm["Assembly Level"].apply(simplify_assembly_level).map(LEVEL_RANK)
-    best_by_name = asm.groupby("species")["rank"].max()
+def load_assemblies(path: Path) -> pd.DataFrame:
+    """Lê famscan_all_assemblies_filtered.tsv."""
+    df = pd.read_csv(path, sep="\t")
+    # Normaliza nome da espécie
+    df["species"] = df["Organism Name"].astype(str).str.strip()
+    # Categoria de montagem simplificada
+    df["assembly_category"] = df["Assembly Level"].apply(simplify_assembly_level)
+    return df
 
-    sp = pd.read_csv(INPUT_DIR / "species_country_filtered_clean.tsv", sep="\t")
-    sp = sp[sp["iso2"].isin(NEOTROPICAL_ISO2) & sp["parent_name"].isin(TETRAPOD_GROUPS)]
-    sp = sp[["usageKey", "parent_name", "species"]].drop_duplicates()
-    sp["rank"] = sp["species"].astype(str).str.strip().map(best_by_name)
 
-    # Uma linha por espécie (usageKey): melhor nível entre os nomes ligados a ela
-    per_species = sp.groupby(["usageKey", "parent_name"], as_index=False)["rank"].max()
-    missing = per_species["rank"].isna().sum()
-    if missing:
-        print(f"⚠ {missing} espécies sem nível de montagem casado; ficam fora da contagem.")
-    per_species = per_species.dropna(subset=["rank"])
-    per_species["level"] = per_species["rank"].astype(int).map(RANK_LEVEL)
+def get_best_assembly_per_species(assemblies: pd.DataFrame) -> pd.DataFrame:
+    """
+    Para cada espécie, retém APENAS o melhor nível de montagem.
 
-    table = (
-        per_species.pivot_table(index="parent_name", columns="level", values="usageKey",
-                                aggfunc="nunique", fill_value=0)
-        .reindex(columns=["Chromosome", "Contig", "Scaffold"], fill_value=0)
+    Usa a coluna:
+    - 'assembly_category' (Contig / Scaffold / Chromosome)
+    - 'parent_name' (grupo: Amphibia, Aves, etc.)
+
+    Retorna um DataFrame com colunas:
+    - species
+    - group
+    - assembly_category
+    """
+    rank_map = {"Contig": 1, "Scaffold": 2, "Chromosome": 3}
+
+    asm = assemblies.copy()
+    asm["level_rank"] = asm["assembly_category"].map(rank_map).fillna(0)
+
+    # pega o melhor (maior rank) por espécie
+    asm_best = (
+        asm.sort_values("level_rank")
+           .drop_duplicates(subset=["species"], keep="last")
+           .rename(columns={"parent_name": "group"})
     )
-    table["n_species_with_genome"] = table.sum(axis=1)
-    table = table.rename_axis("group").reset_index().rename_axis(None, axis=1).sort_values("group")
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
-    out_csv = OUT_DIR / "assembly_levels_by_group_Neotropics.csv"
-    table.to_csv(out_csv, index=False)
-    print(table.to_string(index=False))
-    print(f"✅ Tabela S5 salva em: {out_csv}")
+    # mantemos só o essencial
+    asm_best = asm_best[["species", "group", "assembly_category"]]
+
+    # Se quiser restringir só aos tetrapod groups definidos:
+    asm_best = asm_best[asm_best["group"].isin(TETRAPOD_GROUPS)]
+
+    return asm_best
+
+
+def load_neotropical_species(path_sp: Path) -> pd.DataFrame:
+    """
+    Lê species_country_filtered_clean.tsv e devolve
+    as espécies que ocorrem na Neotrópica, com o grupo.
+
+    Espera colunas:
+    - usageKey
+    - parent_name
+    - iso2
+    - species
+    """
+    sp = pd.read_csv(path_sp, sep="\t")
+
+    sp_nt = sp[
+        (sp["iso2"].isin(NEOTROPICAL_ISO2)) &
+        (sp["parent_name"].isin(TETRAPOD_GROUPS))
+    ].copy()
+
+    # Um registro por espécie + grupo
+    sp_nt_unique = (
+        sp_nt[["species", "parent_name"]]
+        .drop_duplicates()
+        .rename(columns={"parent_name": "group"})
+    )
+
+    return sp_nt_unique
+
+
+def count_assembly_levels_by_group_global(asm_best: pd.DataFrame) -> pd.DataFrame:
+    """
+    Conta, GLOBALMENTE, quantas espécies em cada grupo
+    têm melhor montagem em Contig / Scaffold / Chromosome.
+    """
+    counts = (
+        asm_best
+        .groupby(["group", "assembly_category"])["species"]
+        .nunique()
+        .rename("n_species")
+        .reset_index()
+    )
+
+    pivot = counts.pivot_table(
+        index="group",
+        columns="assembly_category",
+        values="n_species",
+        fill_value=0,
+    ).reset_index()
+
+    # garante colunas
+    for col in ["Contig", "Scaffold", "Chromosome"]:
+        if col not in pivot.columns:
+            pivot[col] = 0
+
+    # total de espécies com genoma por grupo
+    pivot["n_species_with_genome"] = (
+        pivot[["Contig", "Scaffold", "Chromosome"]].sum(axis=1)
+    )
+
+    return pivot
+
+
+def count_assembly_levels_by_group_neotropics(
+    asm_best: pd.DataFrame,
+    sp_nt_unique: pd.DataFrame,
+) -> pd.DataFrame:
+    """
+    Conta, APENAS para espécies Neotropicais, quantas espécies em cada grupo
+    têm melhor montagem em Contig / Scaffold / Chromosome.
+
+    asm_best: saída de get_best_assembly_per_species()
+    sp_nt_unique: saída de load_neotropical_species()
+    """
+    # restringe aos species que ocorrem na Neotrópica
+    neo_best = asm_best.merge(
+        sp_nt_unique[["species"]].drop_duplicates(),
+        on="species",
+        how="inner",
+    )
+
+    if neo_best.empty:
+        print("⚠ Nenhuma espécie de asm_best pôde ser associada à Neotrópica.")
+        return pd.DataFrame()
+
+    counts = (
+        neo_best
+        .groupby(["group", "assembly_category"])["species"]
+        .nunique()
+        .rename("n_species")
+        .reset_index()
+    )
+
+    pivot = counts.pivot_table(
+        index="group",
+        columns="assembly_category",
+        values="n_species",
+        fill_value=0,
+    ).reset_index()
+
+    for col in ["Contig", "Scaffold", "Chromosome"]:
+        if col not in pivot.columns:
+            pivot[col] = 0
+
+    pivot["n_species_with_genome"] = (
+        pivot[["Contig", "Scaffold", "Chromosome"]].sum(axis=1)
+    )
+
+    return pivot
+
+
+# =========================
+# main
+# =========================
+
+def main():
+    path_asm = PATH_BASE / "famscan_all_assemblies_filtered.tsv"
+    path_sp = PATH_BASE / "species_country_filtered_clean.tsv"
+
+    print("🔄 Lendo assemblies...")
+    asm = load_assemblies(path_asm)
+
+    print("🔄 Escolhendo melhor montagem por espécie...")
+    asm_best = get_best_assembly_per_species(asm)
+
+    print("🔄 Lendo espécies Neotropicais (GBIF)...")
+    sp_nt_unique = load_neotropical_species(path_sp)
+
+    print("🔄 Contando níveis de montagem por grupo (GLOBAL)...")
+    df_global = count_assembly_levels_by_group_global(asm_best)
+    df_global.to_csv(OUTPUT_DIR / "assembly_levels_by_group_global.csv", index=False)
+    print("✅ Salvo em assembly_levels_by_group_global.csv")
+    print(df_global)
+
+    print("🔄 Contando níveis de montagem por grupo (NEOTRÓPICA)...")
+    df_neo = count_assembly_levels_by_group_neotropics(asm_best, sp_nt_unique)
+    if not df_neo.empty:
+        df_neo.to_csv(OUTPUT_DIR / "assembly_levels_by_group_neotropics.csv", index=False)
+        print("✅ Salvo em assembly_levels_by_group_neotropics.csv")
+        print(df_neo)
+    else:
+        print("⚠ Tabela Neotrópica vazia, nada salvo.")
+
+    print("🏁 Concluído.")
 
 
 if __name__ == "__main__":
