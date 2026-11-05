@@ -1,0 +1,7 @@
+group,Chromosome,Contig,Scaffold,n_species_with_genome
+Amphibia,20.0,4.0,46.0,70.0
+Aves,121.0,24.0,585.0,730.0
+Crocodylia,0.0,0.0,3.0,3.0
+Lepidosauria,16.0,7.0,73.0,96.0
+Mammalia,123.0,6.0,168.0,297.0
+Testudines,17.0,0.0,8.0,25.0
