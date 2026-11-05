@@ -63,7 +63,7 @@ NEOTROPICAL_ISO2 = {
     "MX", "BZ", "CR", "GT", "HN", "NI", "PA", "SV",
     "CU", "DO", "HT", "PR", "JM", "TT", "BB", "BS",
     "AG", "LC", "GD", "VC", "DM",
-    "AR", "BO", "BR", "CL", "CO", "EC", "GF",
+    "AR", "BO", "BR", "CL", "CO", "EC", "FK", "GF",
     "GY", "PE", "PY", "SR", "UY", "VE",
 }
 
@@ -89,7 +89,7 @@ ISO2_TO_ISO3 = {
     "JM": "JAM", "TT": "TTO", "BB": "BRB", "BS": "BHS",
     "AG": "ATG", "LC": "LCA", "GD": "GRD", "VC": "VCT", "DM": "DMA",
     "AR": "ARG", "BO": "BOL", "BR": "BRA", "CL": "CHL", "CO": "COL",
-    "EC": "ECU", "GF": "FRA", "GY": "GUY", "PE": "PER", "PY": "PRY",
+    "EC": "ECU", "FK": "FLK", "GF": "FRA", "GY": "GUY", "PE": "PER", "PY": "PRY",
     "SR": "SUR", "UY": "URY", "VE": "VEN",
 }
 

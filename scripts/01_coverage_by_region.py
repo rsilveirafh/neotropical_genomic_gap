@@ -74,7 +74,7 @@ NEOTROPICAL_ISO2 = {
     "CU", "DO", "HT", "PR", "JM", "TT", "BB", "BS",
     "AG", "LC", "GD", "VC", "DM",
     # América do Sul
-    "AR", "BO", "BR", "CL", "CO", "EC", "GF",
+    "AR", "BO", "BR", "CL", "CO", "EC", "FK", "GF",
     "GY", "PE", "PY", "SR", "UY", "VE",
 }
 
