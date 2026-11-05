@@ -10,20 +10,27 @@ Compara a cobertura genômica por grupo (Tetrapoda) entre 3 regiões:
 
 Usa os arquivos gerados pelo pipeline multi-região:
 
-    region_outputs/<Região>/sampling_by_group_neotropics_unique.csv
+    outputs/region_outputs/<Região>/sampling_by_group_<Região>_unique.csv
 
 Saída:
-    plot_sampling_by_group_3regions.png
+    outputs/plot_sampling_by_group_3regions_horizontal.png (Figura 1 do artigo)
 """
 
+import sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 
 # Ajuste o caminho base se necessário
-PATH_BASE = Path(".")
-BASE_OUTDIR = PATH_BASE / "region_outputs"
+# Os prints usam emoji; garante UTF-8 no terminal do Windows
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
+# Caminhos relativos à raiz do repositório (o script roda de qualquer pasta)
+REPO_DIR = Path(__file__).resolve().parents[1]
+OUTPUT_DIR = REPO_DIR / "outputs"
+BASE_OUTDIR = OUTPUT_DIR / "region_outputs"
 
 # Regiões esperadas (pastas geradas pelo pipeline)
 REGIONS = ["Europe", "NorthAmerica", "Neotropics"]
@@ -116,7 +123,7 @@ def plot_group_comparison_3regions():
     plt.legend(title="Region", fontsize=8, title_fontsize=9)
     plt.tight_layout()
 
-    out_png = PATH_BASE / "plot_sampling_by_group_3regions_horizontal.png"
+    out_png = OUTPUT_DIR / "plot_sampling_by_group_3regions_horizontal.png"
     plt.savefig(out_png, dpi=300)
     plt.close()
     print(f"📊 Figura comparativa entre regiões (horizontal) salva em: {out_png}")

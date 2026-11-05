@@ -4,7 +4,7 @@
 """
 Pipeline de cobertura genômica por região (versão OFFLINE).
 
-Entradas esperadas (no mesmo diretório do script):
+Entradas esperadas (em data/inputs/):
 
 - families_seen_live.csv
     Colunas necessárias:
@@ -27,7 +27,7 @@ Entradas esperadas (no mesmo diretório do script):
         group, n_species_with_genome, n_gbif_species
     (cobertura_global = n_species_with_genome / n_gbif_species)
 
-Saídas (em ./region_outputs/<Região>/):
+Saídas (em outputs/region_outputs/<Região>/):
 
 Por região:
 - sampling_by_group_<Região>_unique.csv
@@ -46,17 +46,25 @@ Figuras:
 - cumulative_genomes_over_time_<Região>.png
 """
 
+import sys
 from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
+# Os prints usam emoji; garante UTF-8 no terminal do Windows
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+
 # =============================================================================
 # 1. Parâmetros gerais
 # =============================================================================
 
-PATH_BASE = Path(".")
+# Caminhos relativos à raiz do repositório (o script roda de qualquer pasta)
+REPO_DIR = Path(__file__).resolve().parents[1]
+PATH_BASE = REPO_DIR / "data" / "inputs"
+OUTPUT_DIR = REPO_DIR / "outputs"
 
 # Países da região Neotropical (ISO2)
 NEOTROPICAL_ISO2 = {
@@ -101,8 +109,8 @@ TETRAPOD_GROUPS = [
     "Crocodylia",
 ]
 
-BASE_OUTDIR = PATH_BASE / "region_outputs"
-BASE_OUTDIR.mkdir(exist_ok=True)
+BASE_OUTDIR = OUTPUT_DIR / "region_outputs"
+BASE_OUTDIR.mkdir(parents=True, exist_ok=True)
 
 # Será ajustado dentro de run_region_pipeline
 OUTDIR = BASE_OUTDIR
