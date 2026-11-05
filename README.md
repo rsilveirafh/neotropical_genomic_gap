@@ -53,8 +53,11 @@ databases (full details in the article's Supplementary Methods):
 ```
 data/inputs/       input tables (see below)
 scripts/
-  01_coverage_by_region.py   coverage by group, family and country, for each region, plus figures
-  02_compare_regions.py      coverage by group across the three regions (Figure 1)
+  01_coverage_by_region.py              coverage by group, family and country, per region (Tables S1–S4, Figures S1–S5, Figure 3)
+  02_compare_regions.py                 coverage by group across the three regions (Figure 1)
+  03_compare_regions_with_assemblies.py same comparison, with the assembly-level composition of each bar
+  04_assembly_levels_by_group.py        best assembly level per species, by group (Table S5)
+  05_map_coverage_by_country.py         country maps of coverage for the six groups (Figure 4)
 supplementary/
   tables/csv/      Tables S1–S5 (csv)
   tables/xlsx/     Tables S1–S5 (formatted for the journal)
@@ -83,8 +86,11 @@ python -m venv .venv
 source .venv/bin/activate          # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
 
-python scripts/01_coverage_by_region.py   # about 2 minutes
+python scripts/01_coverage_by_region.py   # about 2 minutes; run it first
 python scripts/02_compare_regions.py
+python scripts/03_compare_regions_with_assemblies.py
+python scripts/04_assembly_levels_by_group.py
+python scripts/05_map_coverage_by_country.py   # downloads Natural Earth country borders
 ```
 
 The scripts can be run from any folder. Results go to `outputs/`:
@@ -97,6 +103,8 @@ The scripts can be run from any folder. Results go to `outputs/`:
 | `outputs/region_outputs/Neotropics/sampling_by_family_Neotropics_unique.csv` | Table S2 |
 | `outputs/region_outputs/Neotropics/sampling_country_by_group_Neotropics.csv` | Table S3 |
 | `outputs/region_outputs/Neotropics/sampling_country_by_family_Neotropics.csv` | Table S4 |
+| `outputs/region_outputs/Neotropics/assembly_levels_by_group_Neotropics.csv` | Table S5 |
+| `outputs/region_outputs/Neotropics/map_country_group_3x2_Neotropics_quantiles.tif` | Figure 4 |
 | `outputs/region_outputs/Neotropics/plot_sampling_by_family_<group>.png` | Figures S1–S5 |
 
 Each region folder (`Neotropics`, `Europe`, `NorthAmerica`) also holds the family rankings,
