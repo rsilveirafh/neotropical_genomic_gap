@@ -5,20 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Genômica nos Neotrópicos</title>
 <meta name="description" content="Quantas espécies de vertebrados terrestres dos Neotrópicos já têm um genoma publicado? Resumo do artigo publicado na Genetics and Molecular Biology (2026).">
-<meta property="og:title" content="Genômica nos Neotrópicos">
-<meta property="og:description" content="Só 1 em cada 11 espécies de vertebrados terrestres dos Neotrópicos tem genoma publicado. Resumo do artigo na Genetics and Molecular Biology (2026).">
+<meta property="og:title" content="Genômica nos Neotrópicos · Genomics in the Neotropics">
+<meta property="og:description" content="Só 1 em cada 11 espécies de vertebrados terrestres dos Neotrópicos tem genoma publicado. Only 1 in 11 Neotropical land vertebrate species has a published genome.">
 <meta property="og:type" content="website">
+<meta property="og:locale" content="pt_BR">
+<meta property="og:locale:alternate" content="en_US">
 <meta property="og:image" content="https://rsilveirafh.github.io/neotropical_genomic_gap/img/figura2.jpg">
+<link rel="alternate" hreflang="pt-BR" href="https://rsilveirafh.github.io/neotropical_genomic_gap/">
+<link rel="alternate" hreflang="en" href="https://rsilveirafh.github.io/neotropical_genomic_gap/?lang=en">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230b7a62'/%3E%3Crect x='3' y='9' width='10' height='4' fill='%23cfe6dd'/%3E%3C/svg%3E">
 <script>
-  // aplica o tema salvo antes de desenhar a página (evita piscar claro → escuro)
-  try { if (localStorage.getItem("tema") === "escuro") document.documentElement.setAttribute("data-theme", "dark"); } catch (e) {}
+  // aplica tema e língua antes de desenhar a página (evita piscar).
+  // Língua: ?lang=en|pt no endereço > escolha salva > português.
+  try {
+    if (localStorage.getItem("tema") === "escuro") document.documentElement.setAttribute("data-theme", "dark");
+    var q = new URLSearchParams(location.search).get("lang");
+    var l = (q === "en" || q === "pt") ? q : localStorage.getItem("lingua");
+    if (l === "en") { document.documentElement.setAttribute("data-lang", "en"); document.documentElement.lang = "en"; }
+  } catch (e) {}
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
 <style>
-/* Layout: uma coluna de leitura (~68ch) que se alarga para figuras e gráficos; seis silhuetas preenchidas pela cobertura abrem a página. */
+/* Layout: uma coluna na largura das figuras (960 px); seis silhuetas preenchidas pela cobertura abrem a página.
+   Bilíngue: cada texto existe em [lang="pt"] e [lang="en"]; só a língua ativa aparece. */
 :root {
   --bg: #f5f8f6;
   --surface: #e8efeb;
@@ -47,6 +58,7 @@
   --chrom: #3fc29f; --scaf: #2f8a71; --contig: #1f5244;
   color-scheme: dark;
 }
+html:not([data-lang="en"]) body [lang="en"]:not(.keep-lang), html[data-lang="en"] body [lang="pt"]:not(.keep-lang) { display: none !important; }
 
 * { box-sizing: border-box; }
 body {
@@ -75,13 +87,14 @@ section { display: grid; gap: 20px; }
 /* Abertura */
 header.hero { padding-top: 48px; display: grid; gap: 22px; }
 .topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
-.theme-toggle {
+.toggles { display: flex; gap: 8px; flex-wrap: wrap; }
+.pill {
   display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
   font: 500 0.85rem var(--font-body); color: var(--fg); background: transparent;
   border: 1.5px solid var(--line); border-radius: 999px; padding: 5px 13px;
 }
-.theme-toggle:hover { border-color: var(--muted); }
-.theme-toggle svg { width: 15px; height: 15px; }
+.pill:hover { border-color: var(--muted); }
+.pill svg { width: 15px; height: 15px; }
 .hero .lede { font-size: 1.25rem; max-width: var(--text); }
 .hero .lede strong { color: var(--accent); }
 /* Silhuetas: cada forma é uma máscara preenchida de baixo para cima até a cobertura do grupo */
@@ -134,7 +147,7 @@ header.hero { padding-top: 48px; display: grid; gap: 22px; }
 /* Figuras */
 figure { margin: 0; display: grid; gap: 10px; }
 figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
-/* legendas acompanham a largura da figura ou da tabela, não a coluna de texto */
+/* legendas acompanham a largura da figura ou da tabela */
 figcaption { font-size: 0.92rem; color: var(--muted); max-width: none; }
 caption.note { max-width: none; }
 figcaption b { color: var(--fg); }
@@ -160,200 +173,222 @@ footer .ref { font-family: var(--font-body); }
   <header class="hero">
     <div class="topline">
       <p class="eyebrow">Genetics and Molecular Biology · 2026</p>
-      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false"></button>
+      <div class="toggles">
+        <button type="button" class="pill keep-lang" id="lang-toggle"></button>
+        <button type="button" class="pill" id="theme-toggle" aria-pressed="false"></button>
+      </div>
     </div>
-    <h1>Genômica nos Neotrópicos</h1>
-    <p class="lede">A região mais biodiversa do planeta ainda tem poucos genomas. Entre as espécies de vertebrados terrestres que vivem do México ao sul da América do Sul, só <strong>1 em cada 11</strong> tem um genoma publicado. Para anfíbios, lagartos e serpentes, a proporção cai para cerca de <strong>1 em 40</strong>.</p>
+    <h1 lang="pt">Genômica nos Neotrópicos</h1>
+    <h1 lang="en">Genomics in the Neotropics</h1>
+    <p class="lede" lang="pt">A região mais biodiversa do planeta ainda tem poucos genomas. Entre as espécies de vertebrados terrestres que vivem do México ao sul da América do Sul, só <strong>1 em cada 11</strong> tem um genoma publicado. Para anfíbios, lagartos e serpentes, a proporção cai para cerca de <strong>1 em 40</strong>.</p>
+    <p class="lede" lang="en">The most biodiverse region on the planet still has few genomes. Among the land vertebrate species living from Mexico to the southern tip of South America, only <strong>1 in 11</strong> has a published genome. For amphibians, lizards and snakes, the ratio drops to about <strong>1 in 40</strong>.</p>
 
     <div class="sils-wrap">
       <div class="sils" id="sils"></div>
-      <p class="note">A parte colorida de cada silhueta é a porcentagem de espécies do grupo nos Neotrópicos que têm genoma no NCBI, medida pela área da silhueta, de baixo para cima. Estão em ordem crescente, do sapo ao crocodilo. Os crocodilianos têm só 11 espécies na região, então uma espécie a mais ou a menos muda muito a porcentagem.</p>
+      <p class="note" lang="pt">A parte colorida de cada silhueta é a porcentagem de espécies do grupo nos Neotrópicos que têm genoma no NCBI, medida pela área da silhueta, de baixo para cima. Estão em ordem crescente, do sapo ao crocodilo. Os crocodilianos têm só 11 espécies na região, então uma espécie a mais ou a menos muda muito a porcentagem.</p>
+      <p class="note" lang="en">The colored part of each silhouette is the percentage of the group's Neotropical species that have a genome in NCBI, measured by the silhouette's area, from the bottom up. They are in increasing order, from the frog to the crocodile. Crocodilians have only 11 species in the region, so one species more or less changes the percentage a lot.</p>
     </div>
 
-    <p class="cite-line"><a href="mailto:renatampirani@gmail.com" title="Renata M. Pirani, autora para correspondência">Pirani RM</a>, Rainha RN, Magalhães FM, da Silveira Filho RR, Werneck FP, Domingos FMCB e Vasconcellos MM. <a href="https://doi.org/10.1590/1678-4685-GMB-2025-0276">doi:10.1590/1678-4685-GMB-2025-0276</a></p>
+    <p class="cite-line"><a href="mailto:renatampirani@gmail.com" class="author-link">Pirani RM</a>, Rainha RN, Magalhães FM, da Silveira Filho RR, Werneck FP, Domingos FMCB <span lang="pt">e</span><span lang="en">and</span> Vasconcellos MM. <a href="https://doi.org/10.1590/1678-4685-GMB-2025-0276">doi:10.1590/1678-4685-GMB-2025-0276</a></p>
   </header>
 
   <section class="prose">
-    <p class="eyebrow">Por que isso importa</p>
-    <h2>Um genoma é o mapa completo do DNA de uma espécie</h2>
-    <p>Com ele dá para estudar como as espécies surgiram, como se adaptam ao clima e quanto da sua diversidade genética já foi perdida. Esses dados também ajudam a decidir quais populações proteger. Mas sequenciar genomas é caro, e a maior parte dos genomas publicados vem de espécies da Europa, da América do Norte e de outros países ricos. Os Neotrópicos, que reúnem a Amazônia, os Andes, o Cerrado, a Caatinga, a Mata Atlântica e o Caribe, ficam para trás.</p>
+    <p class="eyebrow"><span lang="pt">Por que isso importa</span><span lang="en">Why it matters</span></p>
+    <h2 lang="pt">Um genoma é o mapa completo do DNA de uma espécie</h2>
+    <h2 lang="en">A genome is the complete map of a species' DNA</h2>
+    <p lang="pt">Com ele dá para estudar como as espécies surgiram, como se adaptam ao clima e quanto da sua diversidade genética já foi perdida. Esses dados também ajudam a decidir quais populações proteger. Mas sequenciar genomas é caro, e a maior parte dos genomas publicados vem de espécies da Europa, da América do Norte e de outros países ricos. Os Neotrópicos, que reúnem a Amazônia, os Andes, o Cerrado, a Caatinga, a Mata Atlântica e o Caribe, ficam para trás.</p>
+    <p lang="en">With it we can study how species arose, how they adapt to climate and how much of their genetic diversity has already been lost. These data also help decide which populations to protect. But sequencing genomes is expensive, and most published genomes come from species in Europe, North America and other wealthy countries. The Neotropics, home to the Amazon, the Andes, the Cerrado, the Caatinga, the Atlantic Forest and the Caribbean, are falling behind.</p>
   </section>
 
   <section>
     <div class="prose stack">
-      <p class="eyebrow">O que fizemos</p>
-      <h2>Cruzamos duas bases públicas, espécie por espécie</h2>
-      <p>Do <b>GBIF</b>, que reúne registros de ocorrência de espécies, tiramos a lista de anfíbios, répteis, aves e mamíferos que vivem em cada um de 35 países e territórios neotropicais. Do <b>NCBI</b>, o maior repositório de genomas do mundo, tiramos todas as montagens de genoma desses grupos. Depois contamos, para cada grupo, família e país, quantas espécies já têm pelo menos um genoma. Fizemos a mesma conta para a Europa e a América do Norte, para comparar.</p>
+      <p class="eyebrow"><span lang="pt">O que fizemos</span><span lang="en">What we did</span></p>
+      <h2 lang="pt">Cruzamos duas bases públicas, espécie por espécie</h2>
+      <h2 lang="en">We matched two public databases, species by species</h2>
+      <p lang="pt">Do <b>GBIF</b>, que reúne registros de ocorrência de espécies, tiramos a lista de anfíbios, répteis, aves e mamíferos que vivem em cada um de 35 países e territórios neotropicais. Do <b>NCBI</b>, o maior repositório de genomas do mundo, tiramos todas as montagens de genoma desses grupos. Depois contamos, para cada grupo, família e país, quantas espécies já têm pelo menos um genoma. Fizemos a mesma conta para a Europa e a América do Norte, para comparar.</p>
+      <p lang="en">From <b>GBIF</b>, which gathers species occurrence records, we took the list of amphibians, reptiles, birds and mammals living in each of 35 Neotropical countries and territories. From <b>NCBI</b>, the world's largest genome repository, we took every genome assembly for these groups. Then we counted, for each group, family and country, how many species already have at least one genome. We did the same for Europe and North America, for comparison.</p>
     </div>
   </section>
 
   <section>
     <div class="prose stack">
-      <p class="eyebrow">Resultado 1</p>
-      <h2>Os grupos mais diversos são os menos sequenciados</h2>
-      <p>Aves e mamíferos concentram a maior parte dos genomas. Anfíbios e lagartos e serpentes somam mais de 6.500 espécies na região, e menos de 170 delas têm genoma.</p>
+      <p class="eyebrow"><span lang="pt">Resultado 1</span><span lang="en">Result 1</span></p>
+      <h2 lang="pt">Os grupos mais diversos são os menos sequenciados</h2>
+      <h2 lang="en">The most diverse groups are the least sequenced</h2>
+      <p lang="pt">Aves e mamíferos concentram a maior parte dos genomas. Anfíbios e lagartos e serpentes somam mais de 6.500 espécies na região, e menos de 170 delas têm genoma.</p>
+      <p lang="en">Birds and mammals hold most of the genomes. Amphibians plus lizards and snakes add up to more than 6,500 species in the region, and fewer than 170 of them have a genome.</p>
     </div>
     <div class="bars" id="bars-abs"></div>
-    <p class="note">O comprimento de cada barra é o número de espécies do grupo nos Neotrópicos. A parte verde são as espécies com genoma. Dados da Tabela S1 do artigo.</p>
+    <p class="note" lang="pt">O comprimento de cada barra é o número de espécies do grupo nos Neotrópicos. A parte verde são as espécies com genoma. Dados da Tabela S1 do artigo.</p>
+    <p class="note" lang="en">The length of each bar is the number of species of the group in the Neotropics. The green part is the species with a genome. Data from Table S1 of the article.</p>
   </section>
 
   <section>
     <div class="prose stack">
-      <p class="eyebrow">Resultado 2</p>
-      <h2>Os Neotrópicos ficam atrás da Europa e da América do Norte</h2>
-      <p>Em proporção de espécies com genoma, a região está abaixo das outras duas em quase todos os grupos. A diferença é maior nos anfíbios: 2,1% nos Neotrópicos contra cerca de 14% na Europa e na América do Norte.</p>
+      <p class="eyebrow"><span lang="pt">Resultado 2</span><span lang="en">Result 2</span></p>
+      <h2 lang="pt">Os Neotrópicos ficam atrás da Europa e da América do Norte</h2>
+      <h2 lang="en">The Neotropics lag behind Europe and North America</h2>
+      <p lang="pt">Em proporção de espécies com genoma, a região está abaixo das outras duas em quase todos os grupos. A diferença é maior nos anfíbios: 2,1% nos Neotrópicos contra cerca de 14% na Europa e na América do Norte.</p>
+      <p lang="en">In the share of species with a genome, the region is below the other two in almost every group. The gap is largest in amphibians: 2.1% in the Neotropics versus about 14% in Europe and North America.</p>
     </div>
-    <div class="legend">
-      <span><i class="swatch" style="background: var(--accent)"></i>Neotrópicos</span>
-      <span><i class="swatch" style="background: var(--europe)"></i>Europa</span>
-      <span><i class="swatch" style="background: var(--namerica)"></i>América do Norte</span>
-    </div>
+    <div class="legend" id="region-legend"></div>
     <div class="compare" id="compare"></div>
-    <p class="note">Crocodilianos e tartarugas têm poucas espécies, então uma espécie a mais ou a menos muda bastante a porcentagem. O único crocodiliano registrado na Europa é um animal de cativeiro, por isso o valor de 0% ali não deve ser lido como uma lacuna.</p>
+    <p class="note" lang="pt">Crocodilianos e tartarugas têm poucas espécies, então uma espécie a mais ou a menos muda bastante a porcentagem. O único crocodiliano registrado na Europa é um animal de cativeiro, por isso o valor de 0% ali não deve ser lido como uma lacuna.</p>
+    <p class="note" lang="en">Crocodilians and turtles have few species, so one species more or less changes the percentage considerably. The only crocodilian recorded in Europe is a captive animal, so the 0% there should not be read as a gap.</p>
   </section>
 
   <section>
     <div class="prose stack">
-      <p class="eyebrow">Resultado 3</p>
-      <h2>Poucas famílias concentram os genomas</h2>
-      <p>Entre as aves, papagaios e araras (Psittacidae, 122 espécies com genoma), patos (Anatidae, 72) e gaviões (Accipitridae, 48) lideram. Entre os mamíferos, os destaques são os saguis (Callitrichidae, 22), os zogue-zogues, parauacus e uacaris (Pitheciidae, 22) e os morcegos Phyllostomidae (19). Nos répteis, Colubridae é a única família de lagartos e serpentes com mais de 20 espécies sequenciadas. Nos anfíbios, a família mais amostrada, Hylidae, tem cerca de 15.</p>
-      <p>A maioria dos genomas também é incompleta. Só um quarto chega ao nível de cromossomo, o mais útil para comparar espécies.</p>
+      <p class="eyebrow"><span lang="pt">Resultado 3</span><span lang="en">Result 3</span></p>
+      <h2 lang="pt">Poucas famílias concentram os genomas</h2>
+      <h2 lang="en">A few families hold most of the genomes</h2>
+      <p lang="pt">Entre as aves, papagaios e araras (Psittacidae, 122 espécies com genoma), patos (Anatidae, 72) e gaviões (Accipitridae, 48) lideram. Entre os mamíferos, os destaques são os saguis (Callitrichidae, 22), os zogue-zogues, parauacus e uacaris (Pitheciidae, 22) e os morcegos Phyllostomidae (19). Nos répteis, Colubridae é a única família de lagartos e serpentes com mais de 20 espécies sequenciadas. Nos anfíbios, a família mais amostrada, Hylidae, tem cerca de 15.</p>
+      <p lang="en">Among birds, parrots and macaws (Psittacidae, 122 species with a genome), ducks (Anatidae, 72) and hawks (Accipitridae, 48) lead. Among mammals, the highlights are marmosets and tamarins (Callitrichidae, 22), titi monkeys, sakis and uakaris (Pitheciidae, 22) and leaf-nosed bats (Phyllostomidae, 19). Among reptiles, Colubridae is the only lizard and snake family with more than 20 sequenced species. Among amphibians, the best-sampled family, Hylidae, has about 15.</p>
+      <p lang="pt">A maioria dos genomas também é incompleta. Só um quarto chega ao nível de cromossomo, o mais útil para comparar espécies.</p>
+      <p lang="en">Most genomes are also incomplete. Only a quarter reach chromosome level, the most useful for comparing species.</p>
     </div>
     <div class="stack">
-      <div class="levels" id="levels" role="img" aria-label="Nível das montagens: 296 cromossomo, 879 scaffold, 39 contig"></div>
+      <div class="levels" id="levels" role="img"></div>
       <div class="legend" id="levels-legend"></div>
     </div>
     <figure>
-      <a href="img/figura2.jpg"><img src="img/figura2.jpg" alt="Figura 2 do artigo: dez famílias com maior cobertura em anfíbios, aves, mamíferos e lagartos e serpentes, com barras coloridas por nível de montagem." loading="lazy" width="1800" height="1406"></a>
-      <figcaption><b>Figura 2.</b> As dez famílias com maior cobertura em cada grupo (só famílias com pelo menos 10 espécies na região). As cores mostram o nível da montagem: contig (azul), scaffold (laranja) e cromossomo (verde). Os números indicam espécies com genoma sobre o total da família.</figcaption>
+      <a href="img/figura2.jpg"><img src="img/figura2.jpg" data-alt-pt="Figura 2 do artigo: dez famílias com maior cobertura em anfíbios, aves, mamíferos e lagartos e serpentes, com barras coloridas por nível de montagem." data-alt-en="Figure 2 of the article: the ten families with the highest coverage in amphibians, birds, mammals and lizards and snakes, with bars colored by assembly level." alt="" loading="lazy" width="1800" height="1406"></a>
+      <figcaption><span lang="pt"><b>Figura 2.</b> As dez famílias com maior cobertura em cada grupo (só famílias com pelo menos 10 espécies na região). As cores mostram o nível da montagem: contig (azul), scaffold (laranja) e cromossomo (verde). Os números indicam espécies com genoma sobre o total da família.</span><span lang="en"><b>Figure 2.</b> The ten families with the highest coverage in each group (only families with at least 10 species in the region). Colors show the assembly level: contig (blue), scaffold (orange) and chromosome (green). Numbers are species with a genome over the family total.</span></figcaption>
     </figure>
   </section>
 
   <section>
     <div class="prose stack">
-      <p class="eyebrow">Resultado 4</p>
-      <h2>O ritmo de sequenciamento é desigual</h2>
-      <p>Desde 2002, o número de espécies neotropicais com genoma cresce bem mais rápido em aves e mamíferos. Anfíbios e répteis avançam bem mais devagar.</p>
+      <p class="eyebrow"><span lang="pt">Resultado 4</span><span lang="en">Result 4</span></p>
+      <h2 lang="pt">O ritmo de sequenciamento é desigual</h2>
+      <h2 lang="en">The pace of sequencing is uneven</h2>
+      <p lang="pt">Desde 2002, o número de espécies neotropicais com genoma cresce bem mais rápido em aves e mamíferos. Anfíbios e répteis avançam bem mais devagar.</p>
+      <p lang="en">Since 2002, the number of Neotropical species with a genome has grown much faster in birds and mammals. Amphibians and reptiles are advancing much more slowly.</p>
     </div>
     <figure>
-      <a href="img/figura3.jpg"><img src="img/figura3.jpg" alt="Figura 3 do artigo: curvas do número acumulado de espécies com genoma por ano, de 2002 a 2025, para os seis grupos." loading="lazy" width="1800" height="1125"></a>
-      <figcaption><b>Figura 3.</b> Número acumulado de espécies neotropicais com genoma no NCBI, de 2002 a 2025. Cada espécie entra no ano em que seu primeiro genoma foi publicado.</figcaption>
+      <a href="img/figura3.jpg"><img src="img/figura3.jpg" data-alt-pt="Figura 3 do artigo: curvas do número acumulado de espécies com genoma por ano, de 2002 a 2025, para os seis grupos." data-alt-en="Figure 3 of the article: curves of the cumulative number of species with a genome per year, from 2002 to 2025, for the six groups." alt="" loading="lazy" width="1800" height="1125"></a>
+      <figcaption><span lang="pt"><b>Figura 3.</b> Número acumulado de espécies neotropicais com genoma no NCBI, de 2002 a 2025. Cada espécie entra no ano em que seu primeiro genoma foi publicado.</span><span lang="en"><b>Figure 3.</b> Cumulative number of Neotropical species with a genome in NCBI, from 2002 to 2025. Each species enters in the year its first genome was released.</span></figcaption>
     </figure>
   </section>
 
   <section>
     <div class="prose stack">
-      <p class="eyebrow">Resultado 5</p>
-      <h2>Os países mais diversos têm a menor cobertura</h2>
-      <p>Ilhas do Caribe e países do norte da região, como México, Belize e Panamá, têm as maiores proporções de espécies com genoma, em parte porque têm menos espécies e estão perto dos centros de pesquisa da América do Norte. Já Brasil, Colômbia, Equador e Peru, que estão entre os países mais diversos do mundo, raramente passam de 29% em algum grupo além das tartarugas. Para anfíbios e lagartos e serpentes, a cobertura fica abaixo de 10% na maioria dos países.</p>
+      <p class="eyebrow"><span lang="pt">Resultado 5</span><span lang="en">Result 5</span></p>
+      <h2 lang="pt">Os países mais diversos têm a menor cobertura</h2>
+      <h2 lang="en">The most diverse countries have the lowest coverage</h2>
+      <p lang="pt">Ilhas do Caribe e países do norte da região, como México, Belize e Panamá, têm as maiores proporções de espécies com genoma, em parte porque têm menos espécies e estão perto dos centros de pesquisa da América do Norte. Já Brasil, Colômbia, Equador e Peru, que estão entre os países mais diversos do mundo, raramente passam de 29% em algum grupo além das tartarugas. Para anfíbios e lagartos e serpentes, a cobertura fica abaixo de 10% na maioria dos países.</p>
+      <p lang="en">Caribbean islands and countries in the north of the region, such as Mexico, Belize and Panama, have the highest shares of species with a genome, partly because they have fewer species and are close to North American research centers. Brazil, Colombia, Ecuador and Peru, which are among the most diverse countries in the world, rarely exceed 29% in any group other than turtles. For amphibians and for lizards and snakes, coverage stays below 10% in most countries.</p>
     </div>
     <div class="table-wrap">
       <table class="countries">
-        <caption class="note" style="caption-side: bottom; text-align: left; padding-top: 10px;">Porcentagem de espécies com genoma em cinco países (Tabela S3 do artigo). Em laranja, valores abaixo de 10%.</caption>
-        <thead><tr><th>País</th><th>Anfíbios</th><th>Lagartos e serpentes</th><th>Mamíferos</th><th>Aves</th></tr></thead>
+        <caption class="note" style="caption-side: bottom; text-align: left; padding-top: 10px;"><span lang="pt">Porcentagem de espécies com genoma em cinco países (Tabela S3 do artigo). Em laranja, valores abaixo de 10%.</span><span lang="en">Percentage of species with a genome in five countries (Table S3 of the article). In orange, values below 10%.</span></caption>
+        <thead><tr>
+          <th><span lang="pt">País</span><span lang="en">Country</span></th>
+          <th><span lang="pt">Anfíbios</span><span lang="en">Amphibians</span></th>
+          <th><span lang="pt">Lagartos e serpentes</span><span lang="en">Lizards and snakes</span></th>
+          <th><span lang="pt">Mamíferos</span><span lang="en">Mammals</span></th>
+          <th><span lang="pt">Aves</span><span lang="en">Birds</span></th>
+        </tr></thead>
         <tbody id="country-rows"></tbody>
       </table>
     </div>
     <figure>
-      <a href="img/figura4.jpg"><img src="img/figura4.jpg" alt="Figura 4 do artigo: seis mapas dos países neotropicais coloridos pela porcentagem de espécies com genoma em cada grupo." loading="lazy" width="1800" height="2001"></a>
-      <figcaption><b>Figura 4.</b> Cobertura genômica por país para os seis grupos. A cor indica a faixa de porcentagem de espécies com genoma. Países sem dados aparecem em cinza.</figcaption>
+      <a href="img/figura4.jpg"><img src="img/figura4.jpg" data-alt-pt="Figura 4 do artigo: seis mapas dos países neotropicais coloridos pela porcentagem de espécies com genoma em cada grupo." data-alt-en="Figure 4 of the article: six maps of the Neotropical countries colored by the percentage of species with a genome in each group." alt="" loading="lazy" width="1800" height="2001"></a>
+      <figcaption><span lang="pt"><b>Figura 4.</b> Cobertura genômica por país para os seis grupos. A cor indica a faixa de porcentagem de espécies com genoma. Países sem dados aparecem em cinza.</span><span lang="en"><b>Figure 4.</b> Genomic coverage by country for the six groups. The color shows the range of the percentage of species with a genome. Countries without data appear in gray.</span></figcaption>
     </figure>
   </section>
 
   <section class="two">
     <div class="stack">
-      <p class="eyebrow">Onde sequenciar primeiro</p>
-      <h2>Áreas prioritárias</h2>
+      <p class="eyebrow"><span lang="pt">Onde sequenciar primeiro</span><span lang="en">Where to sequence first</span></p>
+      <h2><span lang="pt">Áreas prioritárias</span><span lang="en">Priority areas</span></h2>
       <ul class="list">
-        <li><h3>Amazônia, sobretudo a ocidental</h3><p>A maior riqueza de espécies coincide com a menor representação genômica.</p></li>
-        <li><h3>Andes e tepuis</h3><p>Laboratórios naturais para estudar adaptação à altitude e ao clima.</p></li>
-        <li><h3>Cerrado, Caatinga e Chaco</h3><p>Biomas secos e sazonais, com linhagens únicas e forte pressão humana.</p></li>
-        <li><h3>Remanescentes de Mata Atlântica</h3><p>Ligam a fragmentação histórica à perda de diversidade genética de espécies endêmicas.</p></li>
+        <li><h3><span lang="pt">Amazônia, sobretudo a ocidental</span><span lang="en">The Amazon, especially the west</span></h3><p lang="pt">A maior riqueza de espécies coincide com a menor representação genômica.</p><p lang="en">The highest species richness coincides with the lowest genomic representation.</p></li>
+        <li><h3><span lang="pt">Andes e tepuis</span><span lang="en">Andes and tepuis</span></h3><p lang="pt">Laboratórios naturais para estudar adaptação à altitude e ao clima.</p><p lang="en">Natural laboratories for studying adaptation to altitude and climate.</p></li>
+        <li><h3><span lang="pt">Cerrado, Caatinga e Chaco</span><span lang="en">Cerrado, Caatinga and Chaco</span></h3><p lang="pt">Biomas secos e sazonais, com linhagens únicas e forte pressão humana.</p><p lang="en">Dry, seasonal biomes with unique lineages and strong human pressure.</p></li>
+        <li><h3><span lang="pt">Remanescentes de Mata Atlântica</span><span lang="en">Atlantic Forest remnants</span></h3><p lang="pt">Ligam a fragmentação histórica à perda de diversidade genética de espécies endêmicas.</p><p lang="en">They link historical fragmentation to the loss of genetic diversity in endemic species.</p></li>
       </ul>
     </div>
     <div class="stack">
-      <p class="eyebrow">O que propomos</p>
-      <h2>Capacidade local</h2>
+      <p class="eyebrow"><span lang="pt">O que propomos</span><span lang="en">What we propose</span></p>
+      <h2><span lang="pt">Capacidade local</span><span lang="en">Local capacity</span></h2>
       <ul class="list">
-        <li><h3>Formação</h3><p>Bioinformática e ciência de dados nos cursos de pós-graduação da América Latina, e vagas reservadas para pesquisadores do Sul Global em cursos internacionais.</p></li>
-        <li><h3>Infraestrutura computacional</h3><p>Acesso gratuito ou barato a clusters de computação para analisar os dados na própria região.</p></li>
-        <li><h3>Colaboração equilibrada</h3><p>Projetos desenhados em conjunto, autoria justa, acordos de dados equitativos e parcerias de longo prazo, em vez de amostras que saem do Sul e benefícios que ficam no Norte.</p></li>
+        <li><h3><span lang="pt">Formação</span><span lang="en">Training</span></h3><p lang="pt">Bioinformática e ciência de dados nos cursos de pós-graduação da América Latina, e vagas reservadas para pesquisadores do Sul Global em cursos internacionais.</p><p lang="en">Bioinformatics and data science in Latin American graduate programs, and reserved places for Global South researchers in international courses.</p></li>
+        <li><h3><span lang="pt">Infraestrutura computacional</span><span lang="en">Computing infrastructure</span></h3><p lang="pt">Acesso gratuito ou barato a clusters de computação para analisar os dados na própria região.</p><p lang="en">Free or low-cost access to computing clusters, so data can be analyzed within the region.</p></li>
+        <li><h3><span lang="pt">Colaboração equilibrada</span><span lang="en">Balanced collaboration</span></h3><p lang="pt">Projetos desenhados em conjunto, autoria justa, acordos de dados equitativos e parcerias de longo prazo, em vez de amostras que saem do Sul e benefícios que ficam no Norte.</p><p lang="en">Jointly designed projects, fair authorship, equitable data agreements and long-term partnerships, instead of samples that leave the South and benefits that stay in the North.</p></li>
       </ul>
     </div>
   </section>
 </main>
 
 <footer>
-  <p class="eyebrow">Leia o artigo</p>
-  <p class="ref"><a href="mailto:renatampirani@gmail.com" title="Renata M. Pirani, autora para correspondência">Pirani RM</a>, Rainha RN, Magalhães FM, da Silveira Filho RR, Werneck FP, Domingos FMCB e Vasconcellos MM (2026). Genomics in the Neotropics: Advances, biases, and future directions for evolutionary research in Tetrapoda. <i>Genetics and Molecular Biology</i> 49 (supl. 2): e20250276. <a href="https://doi.org/10.1590/1678-4685-GMB-2025-0276">doi:10.1590/1678-4685-GMB-2025-0276</a></p>
-  <p>Código, dados e tabelas suplementares: <a href="https://github.com/rsilveirafh/neotropical_genomic_gap">github.com/rsilveirafh/neotropical_genomic_gap</a></p>
-  <p class="note">Dados do NCBI Datasets e do GBIF consultados em 2025. Os números desta página são os das Tabelas S1, S3 e S5 do artigo. Silhuetas adaptadas das figuras do artigo.</p>
+  <p class="eyebrow"><span lang="pt">Leia o artigo</span><span lang="en">Read the article</span></p>
+  <p class="ref"><a href="mailto:renatampirani@gmail.com" class="author-link">Pirani RM</a>, Rainha RN, Magalhães FM, da Silveira Filho RR, Werneck FP, Domingos FMCB <span lang="pt">e</span><span lang="en">and</span> Vasconcellos MM (2026). Genomics in the Neotropics: Advances, biases, and future directions for evolutionary research in Tetrapoda. <i>Genetics and Molecular Biology</i> 49 (<span lang="pt">supl.</span><span lang="en">suppl.</span> 2): e20250276. <a href="https://doi.org/10.1590/1678-4685-GMB-2025-0276">doi:10.1590/1678-4685-GMB-2025-0276</a></p>
+  <p><span lang="pt">Código, dados e tabelas suplementares:</span><span lang="en">Code, data and supplementary tables:</span> <a href="https://github.com/rsilveirafh/neotropical_genomic_gap">github.com/rsilveirafh/neotropical_genomic_gap</a></p>
+  <p class="note" lang="pt">Dados do NCBI Datasets e do GBIF consultados em 2025. Os números desta página são os das Tabelas S1, S3 e S5 do artigo. Silhuetas adaptadas das figuras do artigo.</p>
+  <p class="note" lang="en">Data from NCBI Datasets and GBIF, accessed in 2025. The numbers on this page are from Tables S1, S3 and S5 of the article. Silhouettes adapted from the article's figures.</p>
 </footer>
 
 <script src="img/silhuetas.js"></script>
 <script>
 (function () {
+  var root = document.documentElement;
+
+  // Textos gerados pelo script, nas duas línguas
+  var T = {
+    pt: {
+      locale: "pt-BR", of: "de", species: "espécies", withGenome: "espécies com genoma",
+      regions: { neo: "Neotrópicos", eu: "Europa", na: "América do Norte" },
+      levels: ["Cromossomo", "Scaffold", "Contig"],
+      levelsNote: function (n) { return "Melhor montagem de cada uma das " + n + " espécies com genoma"; },
+      levelsAria: "Nível das montagens: 296 cromossomo, 879 scaffold, 39 contig",
+      countries: ["Brasil", "Colômbia", "Equador", "Peru", "México"],
+      themeDark: "Modo escuro", themeLight: "Modo claro",
+      langBtn: "English", langBtnLang: "en", langBtnLabel: "Read this page in English",
+      author: "Renata M. Pirani, autora para correspondência",
+      title: "Genômica nos Neotrópicos",
+      desc: "Quantas espécies de vertebrados terrestres dos Neotrópicos já têm um genoma publicado? Resumo do artigo publicado na Genetics and Molecular Biology (2026)."
+    },
+    en: {
+      locale: "en-US", of: "of", species: "species", withGenome: "species with a genome",
+      regions: { neo: "Neotropics", eu: "Europe", na: "North America" },
+      levels: ["Chromosome", "Scaffold", "Contig"],
+      levelsNote: function (n) { return "Best assembly for each of the " + n + " species with a genome"; },
+      levelsAria: "Assembly level: 296 chromosome, 879 scaffold, 39 contig",
+      countries: ["Brazil", "Colombia", "Ecuador", "Peru", "Mexico"],
+      themeDark: "Dark mode", themeLight: "Light mode",
+      langBtn: "Português", langBtnLang: "pt", langBtnLabel: "Ler esta página em português",
+      author: "Renata M. Pirani, corresponding author",
+      title: "Genomics in the Neotropics",
+      desc: "How many Neotropical land vertebrate species already have a published genome? Summary of the article published in Genetics and Molecular Biology (2026)."
+    }
+  };
+
   // Tabela S1 (Neotrópicos) e equivalentes para Europa e América do Norte
   var GROUPS = [
-    { key: "Aves",         pt: "Aves",                 sci: "Aves",         neo: [728, 4636], eu: [567, 1435], na: [528, 1559] },
-    { key: "Amphibia",     pt: "Anfíbios",             sci: "Amphibia",     neo: [70, 3345],  eu: [22, 153],   na: [81, 565] },
-    { key: "Lepidosauria", pt: "Lagartos e serpentes", sci: "Lepidosauria", neo: [96, 3192],  eu: [49, 309],   na: [95, 729] },
-    { key: "Mammalia",     pt: "Mamíferos",            sci: "Mammalia",     neo: [292, 1983], eu: [235, 592],  na: [240, 1062] },
-    { key: "Testudines",   pt: "Tartarugas",           sci: "Testudines",   neo: [25, 120],   eu: [16, 31],    na: [30, 99] },
-    { key: "Crocodylia",   pt: "Crocodilianos",        sci: "Crocodylia",   neo: [3, 11],     eu: [0, 1],      na: [2, 6] }
+    { key: "Aves",         pt: "Aves",                 en: "Birds",              neo: [728, 4636], eu: [567, 1435], na: [528, 1559] },
+    { key: "Amphibia",     pt: "Anfíbios",             en: "Amphibians",         neo: [70, 3345],  eu: [22, 153],   na: [81, 565] },
+    { key: "Lepidosauria", pt: "Lagartos e serpentes", en: "Lizards and snakes", neo: [96, 3192],  eu: [49, 309],   na: [95, 729] },
+    { key: "Mammalia",     pt: "Mamíferos",            en: "Mammals",            neo: [292, 1983], eu: [235, 592],  na: [240, 1062] },
+    { key: "Testudines",   pt: "Tartarugas",           en: "Turtles",            neo: [25, 120],   eu: [16, 31],    na: [30, 99] },
+    { key: "Crocodylia",   pt: "Crocodilianos",        en: "Crocodilians",       neo: [3, 11],     eu: [0, 1],      na: [2, 6] }
   ];
-  var nf = new Intl.NumberFormat("pt-BR");
-  var pf = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  // Países (Tabela S3): anfíbios, lagartos e serpentes, mamíferos, aves
+  var C = [
+    [[31, 1080], [29, 696], [167, 665], [342, 1932]],
+    [[27, 827],  [30, 599], [127, 596], [374, 2154]],
+    [[17, 707],  [20, 500], [104, 486], [313, 1815]],
+    [[14, 522],  [16, 427], [115, 565], [318, 2021]],
+    [[26, 272],  [66, 546], [122, 442], [328, 1084]]
+  ];
+  var LV = [[296, "var(--chrom)"], [879, "var(--scaf)"], [39, "var(--contig)"]];
+  var REG = [["neo", "var(--accent)"], ["eu", "var(--europe)"], ["na", "var(--namerica)"]];
+  var SCALE = 60; // escala da comparação entre regiões, 0–60%
+
   function pct(a, b) { return b ? 100 * a / b : 0; }
   function byKey(k) { return GROUPS.filter(function (g) { return g.key === k; })[0]; }
 
-  // Barras absolutas
-  var maxN = Math.max.apply(null, GROUPS.map(function (g) { return g.neo[1]; }));
-  document.getElementById("bars-abs").innerHTML = GROUPS.map(function (g) {
-    var w = 100 * g.neo[1] / maxN, f = 100 * g.neo[0] / g.neo[1];
-    return '<div class="bar-row"><div class="label">' + g.pt + '<small>' + g.sci + '</small></div>' +
-      '<div class="track" style="width:' + Math.max(w, 0.6) + '%"><div class="fill" style="width:' + f + '%"></div></div>' +
-      '<div class="bar-meta num">' + nf.format(g.neo[0]) + ' de ' + nf.format(g.neo[1]) + ' espécies · ' + pf.format(pct(g.neo[0], g.neo[1])) + '%</div></div>';
-  }).join("");
-
-  // Comparação entre regiões (escala 0–60%)
-  var SCALE = 60;
-  var regions = [["neo", "Neotrópicos", "var(--accent)"], ["eu", "Europa", "var(--europe)"], ["na", "América do Norte", "var(--namerica)"]];
-  document.getElementById("compare").innerHTML = GROUPS.map(function (g) {
-    return '<div class="cmp"><h3>' + g.pt + ' <small>' + g.sci + '</small></h3>' + regions.map(function (r) {
-      var v = g[r[0]], p = pct(v[0], v[1]);
-      return '<div class="cmp-line' + (r[0] === "neo" ? " neo" : "") + '"><span>' + r[1] + '</span>' +
-        '<span class="t" title="' + nf.format(v[0]) + ' de ' + nf.format(v[1]) + '"><i style="width:' + (100 * p / SCALE) + '%;background:' + r[2] + '"></i></span>' +
-        '<span class="v num">' + pf.format(p) + '%</span></div>';
-    }).join("") + '</div>';
-  }).join("");
-
-  // Nível das montagens (Tabela S5)
-  var LV = [["Cromossomo", 296, "var(--chrom)"], ["Scaffold", 879, "var(--scaf)"], ["Contig", 39, "var(--contig)"]];
-  var tot = LV.reduce(function (s, l) { return s + l[1]; }, 0);
-  document.getElementById("levels").innerHTML = LV.map(function (l) {
-    return '<div style="width:' + (100 * l[1] / tot) + '%;background:' + l[2] + '"></div>';
-  }).join("");
-  document.getElementById("levels-legend").innerHTML = LV.map(function (l) {
-    return '<span><i class="swatch" style="background:' + l[2] + '"></i>' + l[0] + ': <span class="num">' + nf.format(l[1]) + ' (' + pf.format(100 * l[1] / tot) + '%)</span></span>';
-  }).join("") + '<span>Melhor montagem de cada uma das ' + nf.format(tot) + ' espécies com genoma</span>';
-
-  // Países (Tabela S3)
-  var C = [
-    ["Brasil",   [31, 1080], [29, 696], [167, 665], [342, 1932]],
-    ["Colômbia", [27, 827],  [30, 599], [127, 596], [374, 2154]],
-    ["Equador",  [17, 707],  [20, 500], [104, 486], [313, 1815]],
-    ["Peru",     [14, 522],  [16, 427], [115, 565], [318, 2021]],
-    ["México",   [26, 272],  [66, 546], [122, 442], [328, 1084]]
-  ];
-  document.getElementById("country-rows").innerHTML = C.map(function (r) {
-    return "<tr><td>" + r[0] + "</td>" + r.slice(1).map(function (v) {
-      var p = pct(v[0], v[1]);
-      return '<td class="num' + (p < 10 ? " low" : "") + '" title="' + nf.format(v[0]) + " de " + nf.format(v[1]) + '">' + pf.format(p) + "%</td>";
-    }).join("") + "</tr>";
-  }).join("");
-
-  // Silhuetas, em ordem crescente de cobertura; altura comum de ~140 px, largura pela proporção da imagem
+  // Silhuetas: formas desenhadas uma vez; os textos mudam com a língua
   var SHAPES = [["frog", "Amphibia"], ["lizard", "Lepidosauria"], ["monkey", "Mammalia"], ["bird", "Aves"], ["turtle", "Testudines"], ["croc", "Crocodylia"]];
   var SIL = window.SIL || {};
   // altura de corte (em % da altura) em que a parte de baixo tem a fração p da área da silhueta
@@ -369,26 +404,103 @@ footer .ref { font-family: var(--font-body); }
   var box = document.getElementById("sils");
   box.innerHTML = SHAPES.filter(function (s) { return SIL[s[0]]; }).map(function (s) {
     var d = SIL[s[0]], g = byKey(s[1]), p = pct(g.neo[0], g.neo[1]);
-    return '<div class="sil"><div class="shape" data-p="' + cutHeight(d.area, p).toFixed(2) + '" role="img" aria-label="' + g.pt + ": " + nf.format(g.neo[0]) + " de " + nf.format(g.neo[1]) + " espécies com genoma (" + pf.format(p) + '%)" ' +
+    return '<div class="sil" data-g="' + s[1] + '"><div class="shape" data-p="' + cutHeight(d.area, p).toFixed(2) + '" role="img" ' +
       'style="width:' + Math.round(140 * d.w / d.h) + "px;aspect-ratio:" + d.w + "/" + d.h + ";-webkit-mask-image:url(" + d.uri + ");mask-image:url(" + d.uri + ')"></div>' +
-      '<div class="pct num" aria-hidden="true">' + pf.format(p) + '%</div><div class="lbl" aria-hidden="true">' + g.pt + '<br><span class="num">' + nf.format(g.neo[0]) + " de " + nf.format(g.neo[1]) + "</span></div></div>";
+      '<div class="pct num" aria-hidden="true"></div><div class="lbl" aria-hidden="true"></div></div>';
   }).join("");
-  // Botão de tema: claro por padrão; a escolha fica salva neste navegador
-  var tbtn = document.getElementById("theme-toggle"), root = document.documentElement;
+
   var MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
   var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>';
-  function paintToggle() {
+  var GLOBE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a14 14 0 0 1 0 18M12 3a14 14 0 0 0 0 18"/></svg>';
+  var tbtn = document.getElementById("theme-toggle"), lbtn = document.getElementById("lang-toggle");
+
+  function lang() { return root.getAttribute("data-lang") === "en" ? "en" : "pt"; }
+
+  function render() {
+    var L = lang(), t = T[L];
+    var nf = new Intl.NumberFormat(t.locale);
+    var pf = new Intl.NumberFormat(t.locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+    function frac(v) { return nf.format(v[0]) + " " + t.of + " " + nf.format(v[1]); }
+
+    // Barras absolutas
+    var maxN = Math.max.apply(null, GROUPS.map(function (g) { return g.neo[1]; }));
+    document.getElementById("bars-abs").innerHTML = GROUPS.map(function (g) {
+      var w = 100 * g.neo[1] / maxN, f = 100 * g.neo[0] / g.neo[1];
+      return '<div class="bar-row"><div class="label">' + g[L] + '<small>' + g.key + '</small></div>' +
+        '<div class="track" style="width:' + Math.max(w, 0.6) + '%"><div class="fill" style="width:' + f + '%"></div></div>' +
+        '<div class="bar-meta num">' + frac(g.neo) + " " + t.species + " · " + pf.format(pct(g.neo[0], g.neo[1])) + '%</div></div>';
+    }).join("");
+
+    // Comparação entre regiões
+    document.getElementById("region-legend").innerHTML = REG.map(function (r) {
+      return '<span><i class="swatch" style="background:' + r[1] + '"></i>' + t.regions[r[0]] + "</span>";
+    }).join("");
+    document.getElementById("compare").innerHTML = GROUPS.map(function (g) {
+      return '<div class="cmp"><h3>' + g[L] + ' <small>' + g.key + '</small></h3>' + REG.map(function (r) {
+        var v = g[r[0]], p = pct(v[0], v[1]);
+        return '<div class="cmp-line' + (r[0] === "neo" ? " neo" : "") + '"><span>' + t.regions[r[0]] + '</span>' +
+          '<span class="t" title="' + frac(v) + '"><i style="width:' + (100 * p / SCALE) + '%;background:' + r[1] + '"></i></span>' +
+          '<span class="v num">' + pf.format(p) + '%</span></div>';
+      }).join("") + '</div>';
+    }).join("");
+
+    // Nível das montagens (Tabela S5)
+    var tot = LV.reduce(function (s, l) { return s + l[0]; }, 0);
+    var lev = document.getElementById("levels");
+    lev.setAttribute("aria-label", t.levelsAria);
+    lev.innerHTML = LV.map(function (l) { return '<div style="width:' + (100 * l[0] / tot) + '%;background:' + l[1] + '"></div>'; }).join("");
+    document.getElementById("levels-legend").innerHTML = LV.map(function (l, i) {
+      return '<span><i class="swatch" style="background:' + l[1] + '"></i>' + t.levels[i] + ': <span class="num">' + nf.format(l[0]) + ' (' + pf.format(100 * l[0] / tot) + '%)</span></span>';
+    }).join("") + '<span>' + t.levelsNote(nf.format(tot)) + '</span>';
+
+    // Países (Tabela S3)
+    document.getElementById("country-rows").innerHTML = C.map(function (r, i) {
+      return "<tr><td>" + t.countries[i] + "</td>" + r.map(function (v) {
+        var p = pct(v[0], v[1]);
+        return '<td class="num' + (p < 10 ? " low" : "") + '" title="' + frac(v) + '">' + pf.format(p) + "%</td>";
+      }).join("") + "</tr>";
+    }).join("");
+
+    // Silhuetas: números e nomes
+    Array.prototype.forEach.call(box.querySelectorAll(".sil"), function (el) {
+      var g = byKey(el.getAttribute("data-g")), p = pct(g.neo[0], g.neo[1]);
+      el.querySelector(".shape").setAttribute("aria-label", g[L] + ": " + frac(g.neo) + " " + t.withGenome + " (" + pf.format(p) + "%)");
+      el.querySelector(".pct").textContent = pf.format(p) + "%";
+      el.querySelector(".lbl").innerHTML = g[L] + '<br><span class="num">' + frac(g.neo) + "</span>";
+    });
+
+    // Imagens, links da autora, título e descrição
+    Array.prototype.forEach.call(document.querySelectorAll("img[data-alt-pt]"), function (im) { im.alt = im.getAttribute("data-alt-" + L); });
+    Array.prototype.forEach.call(document.querySelectorAll(".author-link"), function (a) { a.title = t.author; });
+    document.title = t.title;
+    var md = document.querySelector('meta[name="description"]'); if (md) md.setAttribute("content", t.desc);
+
+    // Botões
+    lbtn.innerHTML = GLOBE + t.langBtn;
+    lbtn.setAttribute("lang", t.langBtnLang);
+    lbtn.setAttribute("aria-label", t.langBtnLabel);
     var dark = root.getAttribute("data-theme") === "dark";
-    tbtn.innerHTML = dark ? SUN + "Modo claro" : MOON + "Modo escuro";
+    tbtn.innerHTML = dark ? SUN + t.themeLight : MOON + t.themeDark;
     tbtn.setAttribute("aria-pressed", dark ? "true" : "false");
   }
+
+  // Botão de língua: português por padrão; a escolha fica salva e o endereço ganha ?lang=en
+  lbtn.addEventListener("click", function () {
+    var en = lang() !== "en";
+    if (en) { root.setAttribute("data-lang", "en"); root.lang = "en"; } else { root.removeAttribute("data-lang"); root.lang = "pt-BR"; }
+    try { localStorage.setItem("lingua", en ? "en" : "pt"); } catch (e) {}
+    try { var u = new URL(location.href); if (en) u.searchParams.set("lang", "en"); else u.searchParams.delete("lang"); history.replaceState(null, "", u); } catch (e) {}
+    render();
+  });
+  // Botão de tema: claro por padrão; a escolha fica salva neste navegador
   tbtn.addEventListener("click", function () {
     var dark = root.getAttribute("data-theme") !== "dark";
     if (dark) root.setAttribute("data-theme", "dark"); else root.removeAttribute("data-theme");
     try { localStorage.setItem("tema", dark ? "escuro" : "claro"); } catch (e) {}
-    paintToggle();
+    render();
   });
-  paintToggle();
+
+  render();
 
   // enche as silhuetas depois do primeiro quadro (a transição de --p faz a animação; sem @property, aparece já cheia)
   requestAnimationFrame(function () { requestAnimationFrame(function () {
