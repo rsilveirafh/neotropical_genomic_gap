@@ -2,7 +2,7 @@
 
 Code and data for the bioinformatic case study in:
 
-> Pirani RM, Rainha RN, Magalhães FM, da Silveira Filho RR, Werneck FP, Domingos FMCB and
+> [Pirani RM](mailto:renatampirani@gmail.com), Rainha RN, Magalhães FM, da Silveira Filho RR, Werneck FP, Domingos FMCB and
 > Vasconcellos MM (2026) **Genomics in the Neotropics: Advances, biases, and future directions for
 > evolutionary research in Tetrapoda.** *Genetics and Molecular Biology*.
 > doi:[10.1590/1678-4685-GMB-2025-0276](https://doi.org/10.1590/1678-4685-GMB-2025-0276)
@@ -141,5 +141,7 @@ Code under the MIT License (see `LICENSE`). The input tables derive from NCBI an
 cite those sources and the article when reusing them.
 
 ## Contact
+
+Renata M. Pirani (corresponding author) · [renatampirani@gmail.com](mailto:renatampirani@gmail.com)
 
 Ricardo R. da Silveira Filho · [github.com/rsilveirafh](https://github.com/rsilveirafh)
