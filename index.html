@@ -10,6 +10,10 @@
 <meta property="og:type" content="website">
 <meta property="og:image" content="https://rsilveirafh.github.io/neotropical_genomic_gap/img/figura1.jpg">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230b7a62'/%3E%3Crect x='3' y='9' width='10' height='4' fill='%23cfe6dd'/%3E%3C/svg%3E">
+<script>
+  // aplica o tema salvo antes de desenhar a página (evita piscar claro → escuro)
+  try { if (localStorage.getItem("tema") === "escuro") document.documentElement.setAttribute("data-theme", "dark"); } catch (e) {}
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
@@ -32,8 +36,15 @@
   --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-  /* sempre claro, mesmo com o sistema no modo escuro: as figuras do artigo têm fundo branco */
+  /* claro por padrão (as figuras do artigo têm fundo branco); o botão no topo troca para o escuro */
   color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #0e1613; --surface: #17231e; --fg: #e3ece7; --muted: #9db2a8; --line: #2b3b34;
+  --accent: #3fc29f; --accent-soft: #1d3d33; --gap: #2a3832;
+  --europe: #a99ee0; --namerica: #e3a24a;
+  --chrom: #3fc29f; --scaf: #2f8a71; --contig: #1f5244;
+  color-scheme: dark;
 }
 
 * { box-sizing: border-box; }
@@ -60,6 +71,14 @@ section { display: grid; gap: 20px; }
 
 /* Abertura */
 header.hero { padding-top: 48px; display: grid; gap: 22px; }
+.topline { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.theme-toggle {
+  display: inline-flex; align-items: center; gap: 7px; cursor: pointer;
+  font: 500 0.85rem var(--font-body); color: var(--fg); background: transparent;
+  border: 1.5px solid var(--line); border-radius: 999px; padding: 5px 13px;
+}
+.theme-toggle:hover { border-color: var(--muted); }
+.theme-toggle svg { width: 15px; height: 15px; }
 .hero .lede { font-size: 1.25rem; max-width: 60ch; }
 .hero .lede strong { color: var(--accent); }
 /* Silhuetas: cada forma é uma máscara preenchida de baixo para cima até a cobertura do grupo */
@@ -134,7 +153,10 @@ footer .ref { font-family: var(--font-body); }
 
 <main>
   <header class="hero">
-    <p class="eyebrow">Genetics and Molecular Biology · 2026</p>
+    <div class="topline">
+      <p class="eyebrow">Genetics and Molecular Biology · 2026</p>
+      <button type="button" class="theme-toggle" id="theme-toggle" aria-pressed="false"></button>
+    </div>
     <h1>Genômica nos Neotrópicos</h1>
     <p class="lede">A região mais biodiversa do planeta ainda tem poucos genomas. Entre as espécies de vertebrados terrestres que vivem do México ao sul da América do Sul, só <strong>1 em cada 11</strong> tem um genoma publicado. Para anfíbios, lagartos e serpentes, a proporção cai para cerca de <strong>1 em 40</strong>.</p>
 
@@ -350,6 +372,23 @@ footer .ref { font-family: var(--font-body); }
       'style="width:' + Math.round(140 * d.w / d.h) + "px;aspect-ratio:" + d.w + "/" + d.h + ";-webkit-mask-image:url(" + d.uri + ");mask-image:url(" + d.uri + ')"></div>' +
       '<div class="pct num" aria-hidden="true">' + pf.format(p) + '%</div><div class="lbl" aria-hidden="true">' + g.pt + '<br><span class="num">' + nf.format(g.neo[0]) + " de " + nf.format(g.neo[1]) + "</span></div></div>";
   }).join("");
+  // Botão de tema: claro por padrão; a escolha fica salva neste navegador
+  var tbtn = document.getElementById("theme-toggle"), root = document.documentElement;
+  var MOON = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+  var SUN = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>';
+  function paintToggle() {
+    var dark = root.getAttribute("data-theme") === "dark";
+    tbtn.innerHTML = dark ? SUN + "Modo claro" : MOON + "Modo escuro";
+    tbtn.setAttribute("aria-pressed", dark ? "true" : "false");
+  }
+  tbtn.addEventListener("click", function () {
+    var dark = root.getAttribute("data-theme") !== "dark";
+    if (dark) root.setAttribute("data-theme", "dark"); else root.removeAttribute("data-theme");
+    try { localStorage.setItem("tema", dark ? "escuro" : "claro"); } catch (e) {}
+    paintToggle();
+  });
+  paintToggle();
+
   // enche as silhuetas depois do primeiro quadro (a transição de --p faz a animação; sem @property, aparece já cheia)
   requestAnimationFrame(function () { requestAnimationFrame(function () {
     Array.prototype.forEach.call(box.querySelectorAll(".shape"), function (el) { el.style.setProperty("--p", el.getAttribute("data-p") + "%"); });
