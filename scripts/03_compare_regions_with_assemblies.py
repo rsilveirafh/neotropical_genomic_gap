@@ -184,6 +184,9 @@ def plot_group_comparison_3regions_with_assemblies():
     print("🔄 Lendo species_country_filtered_clean.tsv...")
     sp_path = INPUT_DIR / "species_country_filtered_clean.tsv"
     sp = pd.read_csv(sp_path, sep="\t")
+    # usageKey = 1 é o reino Animalia no GBIF (match falho de nome, ocorrência
+    # em ~250 países). Fica fora, como no script 01.
+    sp = sp[sp["usageKey"] != 1].copy()
 
     print("🔄 Lendo famscan_all_assemblies_filtered.tsv...")
     asm_path = INPUT_DIR / "famscan_all_assemblies_filtered.tsv"

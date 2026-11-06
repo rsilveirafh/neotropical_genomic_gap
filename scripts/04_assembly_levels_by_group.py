@@ -3,6 +3,7 @@
 
 """
 Tabela S5: nível de montagem (melhor montagem por espécie) das espécies neotropicais, por grupo.
+Na Neotrópica, espécie = chave do GBIF (usageKey), como na Tabela S1; o total bate com a S1.
 Também gera a mesma contagem para o mundo todo (assembly_levels_by_group_global.csv).
 
 Entradas: data/inputs/famscan_all_assemblies_filtered.tsv e species_country_filtered_clean.tsv
@@ -131,15 +132,20 @@ def load_neotropical_species(path_sp: Path) -> pd.DataFrame:
     - species
     """
     sp = pd.read_csv(path_sp, sep="\t")
+    # usageKey = 1 é o reino Animalia no GBIF (match falho de nome, ocorrência
+    # em ~250 países). Fica fora, como no script 01.
+    sp = sp[sp["usageKey"] != 1].copy()
 
     sp_nt = sp[
         (sp["iso2"].isin(NEOTROPICAL_ISO2)) &
         (sp["parent_name"].isin(TETRAPOD_GROUPS))
     ].copy()
 
-    # Um registro por espécie + grupo
+    # Um registro por (chave GBIF, nome NCBI, grupo). A mesma usageKey pode
+    # aparecer com mais de um nome (ex.: subespécies), então a contagem final
+    # é feita por usageKey, como na Tabela S1.
     sp_nt_unique = (
-        sp_nt[["species", "parent_name"]]
+        sp_nt[["usageKey", "species", "parent_name"]]
         .drop_duplicates()
         .rename(columns={"parent_name": "group"})
     )
@@ -191,9 +197,11 @@ def count_assembly_levels_by_group_neotropics(
     asm_best: saída de get_best_assembly_per_species()
     sp_nt_unique: saída de load_neotropical_species()
     """
-    # restringe aos species que ocorrem na Neotrópica
-    neo_best = asm_best.merge(
-        sp_nt_unique[["species"]].drop_duplicates(),
+    # restringe aos species que ocorrem na Neotrópica; o grupo vem do GBIF
+    # (mesma fonte da Tabela S1)
+    rank_map = {"Contig": 1, "Scaffold": 2, "Chromosome": 3}
+    neo_best = sp_nt_unique.merge(
+        asm_best[["species", "assembly_category"]],
         on="species",
         how="inner",
     )
@@ -202,9 +210,17 @@ def count_assembly_levels_by_group_neotropics(
         print("⚠ Nenhuma espécie de asm_best pôde ser associada à Neotrópica.")
         return pd.DataFrame()
 
+    # Melhor montagem por chave GBIF dentro de cada grupo (uma espécie = uma
+    # usageKey por grupo, exatamente como o numerador da Tabela S1)
+    neo_best["level_rank"] = neo_best["assembly_category"].map(rank_map)
+    neo_best = (
+        neo_best.sort_values("level_rank")
+        .drop_duplicates(subset=["group", "usageKey"], keep="last")
+    )
+
     counts = (
         neo_best
-        .groupby(["group", "assembly_category"])["species"]
+        .groupby(["group", "assembly_category"])["usageKey"]
         .nunique()
         .rename("n_species")
         .reset_index()

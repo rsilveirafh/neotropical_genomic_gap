@@ -193,7 +193,8 @@ def plot_group_comparison_3regions() -> None:
                 label = "NA (0/0)"
                 x_position = 0.6
             else:
-                label = f"{pct:.1f}% ({genomes_int}/{total_int})"
+                # separador de milhar em inglês (4,636), como pede a GMB
+                label = f"{pct:.1f}% ({genomes_int:,}/{total_int:,})"
                 #label = f"{pct:.1f}%"
                 x_position = pct + 0.6
 
@@ -222,7 +223,13 @@ def plot_group_comparison_3regions() -> None:
 
     fig.savefig(out_png, dpi=300, bbox_inches="tight")
     fig.savefig(out_pdf, bbox_inches="tight")
+    # Figura 1 do artigo: TIFF 600 dpi, LZW, RGB (formato pedido pela GMB)
+    out_tif = PATH_BASE / "plot_sampling_by_group_3regions_horizontal.tif"
+    fig.savefig(out_tif, dpi=600, bbox_inches="tight")
     plt.close(fig)
+    from PIL import Image
+    Image.open(out_tif).convert("RGB").save(out_tif, compression="tiff_lzw", dpi=(600, 600))
+    print(f"   TIF: {out_tif}")
 
     print(f"📊 Figura PNG salva em: {out_png}")
     print(f"📄 Figura PDF salva em: {out_pdf}")

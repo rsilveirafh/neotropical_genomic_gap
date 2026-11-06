@@ -51,6 +51,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.ticker
 from matplotlib.colors import ListedColormap, BoundaryNorm
 
 # Os prints usam emoji; garante UTF-8 no terminal do Windows
@@ -110,6 +111,9 @@ TETRAPOD_GROUPS = [
 ]
 
 BASE_OUTDIR = OUTPUT_DIR / "region_outputs"
+
+# Chave do reino Animalia no GBIF (match falho de nome; ver load_inputs)
+GBIF_KINGDOM_ANIMALIA_KEY = 1
 BASE_OUTDIR.mkdir(parents=True, exist_ok=True)
 
 # Será ajustado dentro de run_region_pipeline
@@ -130,6 +134,10 @@ def load_inputs():
     families["speciesKey"] = families["speciesKey"].astype("Int64")
     sp_gen["usageKey"] = sp_gen["usageKey"].astype("Int64")
     fam_cache["speciesKey"] = fam_cache["speciesKey"].astype("Int64")
+
+    # usageKey = 1 é o reino Animalia no GBIF: nomes do NCBI que não casaram com
+    # nenhuma espécie e herdaram ocorrência em ~250 países. Ficam fora.
+    sp_gen = sp_gen[sp_gen["usageKey"] != GBIF_KINGDOM_ANIMALIA_KEY].copy()
 
     return families, sp_gen, fam_cache
 
@@ -218,9 +226,11 @@ def add_family_assembly_breakdown(
 
     sp_nt = sp_nt.dropna(subset=["family", "species"])
 
-    # Um registro por espécie + grupo + família (independente do país)
+    # Um registro por (chave GBIF, nome NCBI) + grupo + família (independente do país).
+    # A mesma usageKey pode ter mais de um nome (ex.: Plecturocebus caligatus e
+    # P. dubius); a contagem final é por usageKey, como no rótulo n/N.
     sp_nt_unique = (
-        sp_nt[["species", "parent_name", "family"]]
+        sp_nt[["usageKey", "species", "parent_name", "family"]]
         .drop_duplicates()
         .rename(columns={"parent_name": "group"})
     )
@@ -260,9 +270,16 @@ def add_family_assembly_breakdown(
               "de montagem. Gráficos por família serão gerados sem categorias.")
         return fam_sampling_df
 
+    # Melhor montagem por chave GBIF (uma espécie = uma usageKey)
+    sp_asm["level_rank"] = sp_asm["assembly_category"].map(rank_map)
+    sp_asm = (
+        sp_asm.sort_values("level_rank")
+        .drop_duplicates(subset=["group", "family", "usageKey"], keep="last")
+    )
+
     agg = (
         sp_asm
-        .groupby(["group", "family", "assembly_category"])["species"]
+        .groupby(["group", "family", "assembly_category"])["usageKey"]
         .nunique()
         .rename("n_species_with_genome_asm")
         .reset_index()
@@ -739,6 +756,21 @@ def plot_family_sampling(
         plt.title(f"Genomic coverage by family in {grp} ({region_label})")
         plt.tight_layout()
 
+        # Se algum rótulo n/N passar da borda direita, alarga o eixo X para
+        # caber (Figuras S1 e S4). Figuras em que tudo cabe não mudam.
+        ax = plt.gca()
+        fig = plt.gcf()
+        fig.canvas.draw()
+        renderer = fig.canvas.get_renderer()
+        inv = ax.transData.inverted()
+        right_needed = max(
+            inv.transform((t.get_window_extent(renderer).x1, 0))[0] for t in ax.texts
+        ) if ax.texts else 0
+        x_left, x_right = ax.get_xlim()
+        if right_needed > x_right:
+            ax.set_xlim(x_left, x_left + (right_needed - x_left) * 1.03)
+            plt.tight_layout()
+
         out_png = OUTDIR / f"plot_sampling_by_family_{grp}.png"
         plt.savefig(out_png, dpi=300)
         plt.close()
@@ -1029,8 +1061,10 @@ def plot_cumulative_genomes_over_time(
               "Pulando gráfico cumulativo de genomas.")
         return
 
+    # Inclui a chave GBIF: espécie = usageKey (como nas Tabelas S1–S5); nomes
+    # NCBI diferentes com a mesma chave contam uma vez só.
     sp_nt_unique = (
-        sp_nt[["species", "parent_name"]]
+        sp_nt[["usageKey", "species", "parent_name"]]
         .drop_duplicates()
         .rename(columns={"parent_name": "group"})
     )
@@ -1066,7 +1100,7 @@ def plot_cumulative_genomes_over_time(
 
     species_first = (
         asm_neo
-        .groupby(["group", "species"])[date_col]
+        .groupby(["group", "usageKey"])[date_col]
         .min()
         .reset_index()
         .rename(columns={date_col: "first_date"})
@@ -1111,14 +1145,27 @@ def plot_cumulative_genomes_over_time(
 
     plt.xlabel("Genome release date")
     plt.ylabel("Cumulative number of species with genomes")
+    # Separador de milhar em inglês (1,000), como pede a GMB
+    plt.gca().yaxis.set_major_formatter(
+        matplotlib.ticker.FuncFormatter(lambda v, _: f"{v:,.0f}")
+    )
     plt.title(f"Cumulative number of species with genomes over time ({region_label}, Tetrapoda)")
     plt.legend(fontsize=8)
     plt.tight_layout()
 
     out_png = OUTDIR / f"cumulative_genomes_over_time_{region_label}.png"
     plt.savefig(out_png, dpi=300)
+    if region_label == "Neotropics":
+        # Figura 3 do artigo: TIFF 600 dpi, LZW, RGB (formato pedido pela GMB)
+        out_tif = OUTDIR / f"cumulative_genomes_over_time_{region_label}.tif"
+        plt.savefig(out_tif, dpi=600)
+        from PIL import Image
+        Image.open(out_tif).convert("RGB").save(out_tif, compression="tiff_lzw", dpi=(600, 600))
+        print("   TIF:", out_tif)
     plt.close()
     print("📊 Gráfico de espécies com genoma acumuladas no tempo salvo em:", out_png)
+    final = df.groupby("group")["cum_species"].max()
+    print("   Total final por grupo:", final.to_dict(), "| total:", int(df_total["cum_species"].iloc[-1]))
 
 
 def plot_country_group_heatmap(
