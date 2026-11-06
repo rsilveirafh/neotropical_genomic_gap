@@ -27,8 +27,8 @@ It estimates:
 
 Main results: Aves and Mammalia have many high-quality genomes, while the more diverse
 Amphibia and Lepidosauria remain neglected (about 2% and 3% of Neotropical species have a genome),
-and the Neotropics lag behind Europe and North America in every group except Crocodylia (which
-has a single species in Europe).
+and the Neotropics lag behind Europe and North America in every group except Crocodylia (see
+*Known limitations*).
 
 ## How the data were built
 
@@ -44,9 +44,19 @@ databases (full details in the article's Supplementary Methods):
   when GBIF marks them as non-extinct or when they have at least one record after 1950.
 - **Taxonomy.** GBIF and NCBI family names were reconciled through the GBIF Backbone Taxonomy
   (normalised names, exact matching, then conservative fuzzy matching checked by hand).
-- **Neotropical region.** A fixed list of ISO 3166-1 alpha-2 country codes covering Mesoamerica,
-  the Caribbean and South America (see `NEOTROPICAL_ISO2` in `scripts/01_coverage_by_region.py`). A
-  species counts as Neotropical if it occurs in at least one of these countries.
+- **Neotropical region.** A fixed list of 35 ISO 3166-1 alpha-2 country codes covering Mexico and
+  Central America, the Caribbean and South America, including French Guiana and the Falkland Islands
+  (see `NEOTROPICAL_ISO2` in `scripts/01_coverage_by_region.py`). Saint Kitts and Nevis and the
+  smaller Caribbean territories that have their own code (Guadeloupe, Martinique, Aruba, Curaçao,
+  Cayman, Turks and Caicos and Virgin Islands, among others) are not in the list. A species counts
+  as Neotropical if it occurs in at least one of these countries.
+- **Unmatched names.** Five NCBI names (*Anarhynchus nivosus*, *Pezoporus flaviventris*,
+  *Pusa saimensis*, *Bramus lutescens*, *Neodon shergylaensis*) resolved in GBIF only to the kingdom
+  Animalia (`usageKey = 1`) and so inherited occurrences in ~250 countries. The scripts drop them.
+- **Counting species.** Tables and figures count species by GBIF key (`usageKey`), so two NCBI
+  names that GBIF treats as one species (e.g., *Plecturocebus caligatus* and *P. dubius*) count
+  once, and Table S5 adds up to the same totals as Table S1. Figure 3 leaves out *Homo sapiens*,
+  so its Mammalia curve ends one species below Table S1.
 
 ## Repository structure
 
@@ -97,8 +107,9 @@ The scripts can be run from any folder. Results go to `outputs/`:
 
 | Output | In the article |
 |---|---|
-| `outputs/plot_sampling_by_group_3regions_horizontal.png` | Figure 1 |
-| `outputs/region_outputs/Neotropics/cumulative_genomes_over_time_Neotropics.png` | Figure 3 |
+| `outputs/plot_sampling_by_group_3regions_horizontal.png` (and `.tif`, 600 dpi) | Figure 1 |
+| `outputs/region_outputs/Neotropics/plot_top10_families_by_group_2x2_Neotropics.png` | Figure 2 (base; title removed, legend moved and silhouettes added by hand) |
+| `outputs/region_outputs/Neotropics/cumulative_genomes_over_time_Neotropics.png` (and `.tif`, 600 dpi) | Figure 3 |
 | `outputs/region_outputs/Neotropics/sampling_by_group_Neotropics_unique.csv` | Table S1 |
 | `outputs/region_outputs/Neotropics/sampling_by_family_Neotropics_unique.csv` | Table S2 |
 | `outputs/region_outputs/Neotropics/sampling_country_by_group_Neotropics.csv` | Table S3 |
@@ -112,6 +123,17 @@ assembly-level composition, country × group heatmap and richness × coverage pl
 
 In the coverage tables, `n_species_total` is the number of species, `n_species_with_genome` the
 number with at least one assembly, and `sampling_proportion` the ratio between them (0–1).
+
+## Known limitations
+
+- **Non-native and fossil records.** Occurrence filters do not catch every captive or fossil
+  record. In Crocodylia, Europe's only species is a captive Nile crocodile (*Crocodylus niloticus*,
+  Poland); North America includes two fossil alligators (*Alligator olseni*, *A. mefferdi*); and the
+  Neotropics include a hybrid (*Caiman crocodilus crocodilus* × *yacare*, Brazil). Without them,
+  Crocodylia coverage would be undefined in Europe, 2/4 in North America and 3/10 in the
+  Neotropics. Other groups may hold similar records; they have not been audited yet.
+- **Country list.** Smaller Caribbean territories are not part of the Neotropical list (see above),
+  although they have occurrence data.
 
 ## License
 
