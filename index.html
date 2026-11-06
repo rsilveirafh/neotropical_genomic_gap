@@ -37,7 +37,7 @@
   --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   /* claro por padrão (as figuras do artigo têm fundo branco); o botão no topo troca para o escuro */
-  --text: 720px;
+  --text: 100%;
   color-scheme: light;
 }
 :root[data-theme="dark"] {
@@ -56,7 +56,7 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 0 48px;
 }
-/* Regra de largura: todo texto numa coluna só (--text); gráficos e figuras usam a largura inteira (960 px), e suas legendas também */
+/* Regra de largura: tudo (texto, gráficos, figuras e legendas) ocupa a largura das imagens, 960 px (--text) */
 main { max-width: 960px; margin: 0 auto; display: grid; gap: 72px; }
 .prose { max-width: var(--text); }
 .hero h1, .cite-line, footer > * { max-width: var(--text); }
