@@ -1,0 +1,374 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Genômica nos Neotrópicos</title>
+<meta name="description" content="Quantas espécies de vertebrados terrestres dos Neotrópicos já têm um genoma publicado? Resumo do artigo publicado na Genetics and Molecular Biology (2026).">
+<meta property="og:title" content="Genômica nos Neotrópicos">
+<meta property="og:description" content="Só 1 em cada 11 espécies de vertebrados terrestres dos Neotrópicos tem genoma publicado. Resumo do artigo na Genetics and Molecular Biology (2026).">
+<meta property="og:type" content="website">
+<meta property="og:image" content="https://rsilveirafh.github.io/neotropical_genomic_gap/img/figura1.jpg">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Crect width='16' height='16' rx='3' fill='%230b7a62'/%3E%3Crect x='3' y='9' width='10' height='4' fill='%23cfe6dd'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: uma coluna de leitura (~68ch) que se alarga para figuras e gráficos; seis silhuetas preenchidas pela cobertura abrem a página. */
+:root {
+  --bg: #f5f8f6;
+  --surface: #e8efeb;
+  --fg: #15231d;
+  --muted: #4d6158;
+  --line: #c9d6cf;
+  --accent: #0b7a62;      /* espécies com genoma, Neotrópicos */
+  --accent-soft: #cfe6dd;
+  --gap: #d4dcd8;         /* espécies sem genoma */
+  --europe: #8a7fb8;
+  --namerica: #c9862b;
+  --chrom: #0b7a62;
+  --scaf: #6aa98f;
+  --contig: #b9d3c7;
+  --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+  --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1613; --surface: #17231e; --fg: #e3ece7; --muted: #9db2a8; --line: #2b3b34;
+    --accent: #3fc29f; --accent-soft: #1d3d33; --gap: #2a3832;
+    --europe: #a99ee0; --namerica: #e3a24a;
+    --chrom: #3fc29f; --scaf: #2f8a71; --contig: #1f5244;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1613; --surface: #17231e; --fg: #e3ece7; --muted: #9db2a8; --line: #2b3b34;
+  --accent: #3fc29f; --accent-soft: #1d3d33; --gap: #2a3832;
+  --europe: #a99ee0; --namerica: #e3a24a;
+  --chrom: #3fc29f; --scaf: #2f8a71; --contig: #1f5244;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--fg);
+  font-family: var(--font-body); font-size: 1.0625rem; line-height: 1.6;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 0 48px;
+}
+main { max-width: 960px; margin: 0 auto; display: grid; gap: 72px; }
+.prose { max-width: 68ch; }
+h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; text-wrap: balance; margin: 0; }
+h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; letter-spacing: -0.02em; }
+h2 { font-size: clamp(1.6rem, 3.6vw, 2.2rem); font-weight: 700; letter-spacing: -0.01em; }
+h3 { font-size: 1.2rem; font-weight: 700; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 4px; }
+.eyebrow { font-family: var(--font-data); font-size: 0.78rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.num { font-family: var(--font-data); font-variant-numeric: tabular-nums; }
+section { display: grid; gap: 20px; }
+.stack { display: grid; gap: 14px; }
+
+/* Abertura */
+header.hero { padding-top: 48px; display: grid; gap: 22px; }
+.hero .lede { font-size: 1.25rem; max-width: 60ch; }
+.hero .lede strong { color: var(--accent); }
+/* Silhuetas: cada forma é uma máscara preenchida de baixo para cima até a cobertura do grupo */
+@property --p { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
+.sils-wrap { display: grid; gap: 16px; }
+.sils { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 28px; align-items: end; padding-top: 8px; }
+@media (max-width: 620px) { .sils { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 20px; } }
+.sil { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-width: 0; }
+.sil .shape {
+  max-width: 100%; height: auto;
+  -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+  -webkit-mask-position: center bottom; mask-position: center bottom;
+  background: linear-gradient(to top, var(--accent) var(--p), var(--gap) var(--p));
+  transition: --p 1.4s cubic-bezier(.3, .7, .2, 1);
+}
+.sil .pct { font-family: var(--font-display); font-weight: 800; font-size: clamp(1.6rem, 4vw, 2.4rem); line-height: 1; color: var(--accent); }
+.sil .lbl { font-size: 0.92rem; color: var(--muted); line-height: 1.3; }
+@media (prefers-reduced-motion: reduce) { .sil .shape { transition: none; } }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 18px; font-size: 0.9rem; color: var(--muted); }
+.legend span { display: inline-flex; align-items: center; gap: 6px; }
+.swatch { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+.cite-line { font-size: 0.95rem; color: var(--muted); }
+
+/* Gráficos de barras */
+.bars { display: grid; gap: 14px; }
+.bar-row { display: grid; grid-template-columns: minmax(130px, 210px) 1fr; gap: 6px 16px; align-items: center; }
+.bar-row .label { font-weight: 700; line-height: 1.25; }
+.bar-row .label small { display: block; font-weight: 400; color: var(--muted); font-size: 0.82rem; }
+.track { position: relative; height: 22px; background: var(--gap); border-radius: 3px; }
+.track .fill { position: absolute; inset: 0 auto 0 0; background: var(--accent); border-radius: 3px 0 0 3px; }
+.bar-meta { grid-column: 2; font-size: 0.88rem; color: var(--muted); margin-top: -2px; }
+@media (max-width: 560px) {
+  .bar-row { grid-template-columns: 1fr; }
+  .bar-meta { grid-column: 1; }
+}
+
+.compare { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 28px 36px; }
+.cmp { display: grid; gap: 8px; min-width: 0; }
+.cmp h3 small { font: 400 0.85rem var(--font-body); color: var(--muted); }
+.cmp-line { display: grid; grid-template-columns: 9.5em 1fr 4.2em; gap: 10px; align-items: center; font-size: 0.9rem; }
+.cmp-line .t { height: 14px; background: transparent; border-left: 1px solid var(--line); position: relative; }
+.cmp-line .t i { position: absolute; inset: 0 auto 0 0; display: block; border-radius: 0 2px 2px 0; }
+.cmp-line .v { text-align: right; }
+.cmp-line.neo { font-weight: 700; }
+.note { font-size: 0.9rem; color: var(--muted); max-width: 68ch; }
+
+.levels { display: flex; height: 30px; border-radius: 4px; overflow: hidden; }
+.levels div { height: 100%; }
+
+/* Figuras */
+figure { margin: 0; display: grid; gap: 10px; }
+figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
+figcaption { font-size: 0.92rem; color: var(--muted); max-width: 72ch; }
+figcaption b { color: var(--fg); }
+
+.countries { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
+.table-wrap { overflow-x: auto; }
+.countries th, .countries td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--line); white-space: nowrap; }
+.countries th:first-child, .countries td:first-child { text-align: left; }
+.countries thead th { font: 500 0.78rem var(--font-data); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.countries td.low { color: var(--namerica); font-weight: 700; }
+
+.list { display: grid; gap: 18px; margin: 0; padding: 0; list-style: none; }
+.list li { display: grid; gap: 4px; padding-left: 18px; border-left: 3px solid var(--accent-soft); }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
+
+footer { max-width: 960px; margin: 72px auto 0; padding-top: 28px; border-top: 1px solid var(--line); display: grid; gap: 14px; font-size: 0.95rem; }
+footer .ref { font-family: var(--font-body); }
+</style>
+</head>
+<body>
+
+<main>
+  <header class="hero">
+    <p class="eyebrow">Genetics and Molecular Biology · 2026</p>
+    <h1>Genômica nos Neotrópicos</h1>
+    <p class="lede">A região mais biodiversa do planeta ainda tem poucos genomas. Entre as espécies de vertebrados terrestres que vivem do México ao sul da América do Sul, só <strong>1 em cada 11</strong> tem um genoma publicado. Para anfíbios, lagartos e serpentes, a proporção cai para cerca de <strong>1 em 40</strong>.</p>
+
+    <div class="sils-wrap">
+      <div class="sils" id="sils"></div>
+      <p class="note">A parte colorida de cada silhueta é a porcentagem de espécies do grupo nos Neotrópicos que têm genoma no NCBI, medida pela área da silhueta, de baixo para cima. Estão em ordem crescente, do sapo ao crocodilo. Os crocodilianos têm só 11 espécies na região, então uma espécie a mais ou a menos muda muito a porcentagem.</p>
+    </div>
+
+    <p class="cite-line">Pirani RM, Rainha RN, Magalhães FM, da Silveira Filho RR, Werneck FP, Domingos FMCB e Vasconcellos MM. <a href="https://doi.org/10.1590/1678-4685-GMB-2025-0276">doi:10.1590/1678-4685-GMB-2025-0276</a></p>
+  </header>
+
+  <section class="prose">
+    <p class="eyebrow">Por que isso importa</p>
+    <h2>Um genoma é o mapa completo do DNA de uma espécie</h2>
+    <p>Com ele dá para estudar como as espécies surgiram, como se adaptam ao clima e quanto da sua diversidade genética já foi perdida. Esses dados também ajudam a decidir quais populações proteger. Mas sequenciar genomas é caro, e a maior parte dos genomas publicados vem de espécies da Europa, da América do Norte e de outros países ricos. Os Neotrópicos, que reúnem a Amazônia, os Andes, o Cerrado, a Caatinga, a Mata Atlântica e o Caribe, ficam para trás.</p>
+  </section>
+
+  <section>
+    <div class="prose stack">
+      <p class="eyebrow">O que fizemos</p>
+      <h2>Cruzamos duas bases públicas, espécie por espécie</h2>
+      <p>Do <b>GBIF</b>, que reúne registros de ocorrência de espécies, tiramos a lista de anfíbios, répteis, aves e mamíferos que vivem em cada um de 35 países e territórios neotropicais. Do <b>NCBI</b>, o maior repositório de genomas do mundo, tiramos todas as montagens de genoma desses grupos. Depois contamos, para cada grupo, família e país, quantas espécies já têm pelo menos um genoma. Fizemos a mesma conta para a Europa e a América do Norte, para comparar.</p>
+    </div>
+  </section>
+
+  <section>
+    <div class="prose stack">
+      <p class="eyebrow">Resultado 1</p>
+      <h2>Os grupos mais diversos são os menos sequenciados</h2>
+      <p>Aves e mamíferos concentram a maior parte dos genomas. Anfíbios e lagartos e serpentes somam mais de 6.500 espécies na região, e menos de 170 delas têm genoma.</p>
+    </div>
+    <div class="bars" id="bars-abs"></div>
+    <p class="note">O comprimento de cada barra é o número de espécies do grupo nos Neotrópicos. A parte verde são as espécies com genoma. Dados da Tabela S1 do artigo.</p>
+  </section>
+
+  <section>
+    <div class="prose stack">
+      <p class="eyebrow">Resultado 2</p>
+      <h2>Os Neotrópicos ficam atrás da Europa e da América do Norte</h2>
+      <p>Em proporção de espécies com genoma, a região está abaixo das outras duas em quase todos os grupos. A diferença é maior nos anfíbios: 2,1% nos Neotrópicos contra cerca de 14% na Europa e na América do Norte.</p>
+    </div>
+    <div class="legend">
+      <span><i class="swatch" style="background: var(--accent)"></i>Neotrópicos</span>
+      <span><i class="swatch" style="background: var(--europe)"></i>Europa</span>
+      <span><i class="swatch" style="background: var(--namerica)"></i>América do Norte</span>
+    </div>
+    <div class="compare" id="compare"></div>
+    <p class="note">Crocodilianos e tartarugas têm poucas espécies, então uma espécie a mais ou a menos muda bastante a porcentagem. O único crocodiliano registrado na Europa é um animal de cativeiro, por isso o valor de 0% ali não deve ser lido como uma lacuna.</p>
+    <figure>
+      <a href="img/figura1.jpg"><img src="img/figura1.jpg" alt="Figura 1 do artigo: barras horizontais com a porcentagem de espécies com genoma por grupo, nas três regiões." loading="lazy" width="1800" height="1043"></a>
+      <figcaption><b>Figura 1.</b> Cobertura genômica dos tetrápodes nas três regiões. Ao lado das barras, a porcentagem e o número de espécies com genoma sobre o total de espécies.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="prose stack">
+      <p class="eyebrow">Resultado 3</p>
+      <h2>Poucas famílias concentram os genomas</h2>
+      <p>Entre as aves, papagaios e araras (Psittacidae, 122 espécies com genoma), patos (Anatidae, 72) e gaviões (Accipitridae, 48) lideram. Entre os mamíferos, os destaques são os saguis (Callitrichidae, 22), os zogue-zogues, parauacus e uacaris (Pitheciidae, 22) e os morcegos Phyllostomidae (19). Nos répteis, Colubridae é a única família de lagartos e serpentes com mais de 20 espécies sequenciadas. Nos anfíbios, a família mais amostrada, Hylidae, tem cerca de 15.</p>
+      <p>A maioria dos genomas também é incompleta. Só um quarto chega ao nível de cromossomo, o mais útil para comparar espécies.</p>
+    </div>
+    <div class="stack">
+      <div class="levels" id="levels" role="img" aria-label="Nível das montagens: 296 cromossomo, 879 scaffold, 39 contig"></div>
+      <div class="legend" id="levels-legend"></div>
+    </div>
+    <figure>
+      <a href="img/figura2.jpg"><img src="img/figura2.jpg" alt="Figura 2 do artigo: dez famílias com maior cobertura em anfíbios, aves, mamíferos e lagartos e serpentes, com barras coloridas por nível de montagem." loading="lazy" width="1800" height="1406"></a>
+      <figcaption><b>Figura 2.</b> As dez famílias com maior cobertura em cada grupo (só famílias com pelo menos 10 espécies na região). As cores mostram o nível da montagem: contig (azul), scaffold (laranja) e cromossomo (verde). Os números indicam espécies com genoma sobre o total da família.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="prose stack">
+      <p class="eyebrow">Resultado 4</p>
+      <h2>O ritmo de sequenciamento é desigual</h2>
+      <p>Desde 2002, o número de espécies neotropicais com genoma cresce bem mais rápido em aves e mamíferos. Anfíbios e répteis avançam bem mais devagar.</p>
+    </div>
+    <figure>
+      <a href="img/figura3.jpg"><img src="img/figura3.jpg" alt="Figura 3 do artigo: curvas do número acumulado de espécies com genoma por ano, de 2002 a 2025, para os seis grupos." loading="lazy" width="1800" height="1125"></a>
+      <figcaption><b>Figura 3.</b> Número acumulado de espécies neotropicais com genoma no NCBI, de 2002 a 2025. Cada espécie entra no ano em que seu primeiro genoma foi publicado.</figcaption>
+    </figure>
+  </section>
+
+  <section>
+    <div class="prose stack">
+      <p class="eyebrow">Resultado 5</p>
+      <h2>Os países mais diversos têm a menor cobertura</h2>
+      <p>Ilhas do Caribe e países do norte da região, como México, Belize e Panamá, têm as maiores proporções de espécies com genoma, em parte porque têm menos espécies e estão perto dos centros de pesquisa da América do Norte. Já Brasil, Colômbia, Equador e Peru, que estão entre os países mais diversos do mundo, raramente passam de 29% em algum grupo além das tartarugas. Para anfíbios e lagartos e serpentes, a cobertura fica abaixo de 10% na maioria dos países.</p>
+    </div>
+    <div class="table-wrap">
+      <table class="countries">
+        <caption class="note" style="caption-side: bottom; text-align: left; padding-top: 10px;">Porcentagem de espécies com genoma em cinco países (Tabela S3 do artigo). Em laranja, valores abaixo de 10%.</caption>
+        <thead><tr><th>País</th><th>Anfíbios</th><th>Lagartos e serpentes</th><th>Mamíferos</th><th>Aves</th></tr></thead>
+        <tbody id="country-rows"></tbody>
+      </table>
+    </div>
+    <figure>
+      <a href="img/figura4.jpg"><img src="img/figura4.jpg" alt="Figura 4 do artigo: seis mapas dos países neotropicais coloridos pela porcentagem de espécies com genoma em cada grupo." loading="lazy" width="1800" height="2001"></a>
+      <figcaption><b>Figura 4.</b> Cobertura genômica por país para os seis grupos. A cor indica a faixa de porcentagem de espécies com genoma. Países sem dados aparecem em cinza.</figcaption>
+    </figure>
+  </section>
+
+  <section class="two">
+    <div class="stack">
+      <p class="eyebrow">Onde sequenciar primeiro</p>
+      <h2>Áreas prioritárias</h2>
+      <ul class="list">
+        <li><h3>Amazônia, sobretudo a ocidental</h3><p>A maior riqueza de espécies coincide com a menor representação genômica.</p></li>
+        <li><h3>Andes e tepuis</h3><p>Laboratórios naturais para estudar adaptação à altitude e ao clima.</p></li>
+        <li><h3>Cerrado, Caatinga e Chaco</h3><p>Biomas secos e sazonais, com linhagens únicas e forte pressão humana.</p></li>
+        <li><h3>Remanescentes de Mata Atlântica</h3><p>Ligam a fragmentação histórica à perda de diversidade genética de espécies endêmicas.</p></li>
+      </ul>
+    </div>
+    <div class="stack">
+      <p class="eyebrow">O que propomos</p>
+      <h2>Capacidade local</h2>
+      <ul class="list">
+        <li><h3>Formação</h3><p>Bioinformática e ciência de dados nos cursos de pós-graduação da América Latina, e vagas reservadas para pesquisadores do Sul Global em cursos internacionais.</p></li>
+        <li><h3>Infraestrutura computacional</h3><p>Acesso gratuito ou barato a clusters de computação para analisar os dados na própria região.</p></li>
+        <li><h3>Colaboração equilibrada</h3><p>Projetos desenhados em conjunto, autoria justa, acordos de dados equitativos e parcerias de longo prazo, em vez de amostras que saem do Sul e benefícios que ficam no Norte.</p></li>
+      </ul>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <p class="eyebrow">Leia o artigo</p>
+  <p class="ref">Pirani RM, Rainha RN, Magalhães FM, da Silveira Filho RR, Werneck FP, Domingos FMCB e Vasconcellos MM (2026). Genomics in the Neotropics: Advances, biases, and future directions for evolutionary research in Tetrapoda. <i>Genetics and Molecular Biology</i> 49 (supl. 2): e20250276. <a href="https://doi.org/10.1590/1678-4685-GMB-2025-0276">doi:10.1590/1678-4685-GMB-2025-0276</a></p>
+  <p>Código, dados e tabelas suplementares: <a href="https://github.com/rsilveirafh/neotropical_genomic_gap">github.com/rsilveirafh/neotropical_genomic_gap</a></p>
+  <p class="note">Dados do NCBI Datasets e do GBIF consultados em 2025. Os números desta página são os das Tabelas S1, S3 e S5 do artigo. Silhuetas adaptadas das figuras do artigo.</p>
+</footer>
+
+<script src="img/silhuetas.js"></script>
+<script>
+(function () {
+  // Tabela S1 (Neotrópicos) e equivalentes para Europa e América do Norte
+  var GROUPS = [
+    { key: "Aves",         pt: "Aves",                 sci: "Aves",         neo: [728, 4636], eu: [567, 1435], na: [528, 1559] },
+    { key: "Amphibia",     pt: "Anfíbios",             sci: "Amphibia",     neo: [70, 3345],  eu: [22, 153],   na: [81, 565] },
+    { key: "Lepidosauria", pt: "Lagartos e serpentes", sci: "Lepidosauria", neo: [96, 3192],  eu: [49, 309],   na: [95, 729] },
+    { key: "Mammalia",     pt: "Mamíferos",            sci: "Mammalia",     neo: [292, 1983], eu: [235, 592],  na: [240, 1062] },
+    { key: "Testudines",   pt: "Tartarugas",           sci: "Testudines",   neo: [25, 120],   eu: [16, 31],    na: [30, 99] },
+    { key: "Crocodylia",   pt: "Crocodilianos",        sci: "Crocodylia",   neo: [3, 11],     eu: [0, 1],      na: [2, 6] }
+  ];
+  var nf = new Intl.NumberFormat("pt-BR");
+  var pf = new Intl.NumberFormat("pt-BR", { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+  function pct(a, b) { return b ? 100 * a / b : 0; }
+  function byKey(k) { return GROUPS.filter(function (g) { return g.key === k; })[0]; }
+
+  // Barras absolutas
+  var maxN = Math.max.apply(null, GROUPS.map(function (g) { return g.neo[1]; }));
+  document.getElementById("bars-abs").innerHTML = GROUPS.map(function (g) {
+    var w = 100 * g.neo[1] / maxN, f = 100 * g.neo[0] / g.neo[1];
+    return '<div class="bar-row"><div class="label">' + g.pt + '<small>' + g.sci + '</small></div>' +
+      '<div class="track" style="width:' + Math.max(w, 0.6) + '%"><div class="fill" style="width:' + f + '%"></div></div>' +
+      '<div class="bar-meta num">' + nf.format(g.neo[0]) + ' de ' + nf.format(g.neo[1]) + ' espécies · ' + pf.format(pct(g.neo[0], g.neo[1])) + '%</div></div>';
+  }).join("");
+
+  // Comparação entre regiões (escala 0–60%)
+  var SCALE = 60;
+  var regions = [["neo", "Neotrópicos", "var(--accent)"], ["eu", "Europa", "var(--europe)"], ["na", "América do Norte", "var(--namerica)"]];
+  document.getElementById("compare").innerHTML = GROUPS.map(function (g) {
+    return '<div class="cmp"><h3>' + g.pt + ' <small>' + g.sci + '</small></h3>' + regions.map(function (r) {
+      var v = g[r[0]], p = pct(v[0], v[1]);
+      return '<div class="cmp-line' + (r[0] === "neo" ? " neo" : "") + '"><span>' + r[1] + '</span>' +
+        '<span class="t" title="' + nf.format(v[0]) + ' de ' + nf.format(v[1]) + '"><i style="width:' + (100 * p / SCALE) + '%;background:' + r[2] + '"></i></span>' +
+        '<span class="v num">' + pf.format(p) + '%</span></div>';
+    }).join("") + '</div>';
+  }).join("");
+
+  // Nível das montagens (Tabela S5)
+  var LV = [["Cromossomo", 296, "var(--chrom)"], ["Scaffold", 879, "var(--scaf)"], ["Contig", 39, "var(--contig)"]];
+  var tot = LV.reduce(function (s, l) { return s + l[1]; }, 0);
+  document.getElementById("levels").innerHTML = LV.map(function (l) {
+    return '<div style="width:' + (100 * l[1] / tot) + '%;background:' + l[2] + '"></div>';
+  }).join("");
+  document.getElementById("levels-legend").innerHTML = LV.map(function (l) {
+    return '<span><i class="swatch" style="background:' + l[2] + '"></i>' + l[0] + ': <span class="num">' + nf.format(l[1]) + ' (' + pf.format(100 * l[1] / tot) + '%)</span></span>';
+  }).join("") + '<span>Melhor montagem de cada uma das ' + nf.format(tot) + ' espécies com genoma</span>';
+
+  // Países (Tabela S3)
+  var C = [
+    ["Brasil",   [31, 1080], [29, 696], [167, 665], [342, 1932]],
+    ["Colômbia", [27, 827],  [30, 599], [127, 596], [374, 2154]],
+    ["Equador",  [17, 707],  [20, 500], [104, 486], [313, 1815]],
+    ["Peru",     [14, 522],  [16, 427], [115, 565], [318, 2021]],
+    ["México",   [26, 272],  [66, 546], [122, 442], [328, 1084]]
+  ];
+  document.getElementById("country-rows").innerHTML = C.map(function (r) {
+    return "<tr><td>" + r[0] + "</td>" + r.slice(1).map(function (v) {
+      var p = pct(v[0], v[1]);
+      return '<td class="num' + (p < 10 ? " low" : "") + '" title="' + nf.format(v[0]) + " de " + nf.format(v[1]) + '">' + pf.format(p) + "%</td>";
+    }).join("") + "</tr>";
+  }).join("");
+
+  // Silhuetas, em ordem crescente de cobertura; altura comum de ~140 px, largura pela proporção da imagem
+  var SHAPES = [["frog", "Amphibia"], ["lizard", "Lepidosauria"], ["monkey", "Mammalia"], ["bird", "Aves"], ["turtle", "Testudines"], ["croc", "Crocodylia"]];
+  var SIL = window.SIL || {};
+  // altura de corte (em % da altura) em que a parte de baixo tem a fração p da área da silhueta
+  function cutHeight(area, p) {
+    var f = p / 100;
+    if (!area) return p;
+    for (var i = 1; i < area.length; i++) if (area[i] >= f) {
+      var a0 = area[i - 1], a1 = area[i];
+      return (i - 1) + (a1 > a0 ? (f - a0) / (a1 - a0) : 0);
+    }
+    return 100;
+  }
+  var box = document.getElementById("sils");
+  box.innerHTML = SHAPES.filter(function (s) { return SIL[s[0]]; }).map(function (s) {
+    var d = SIL[s[0]], g = byKey(s[1]), p = pct(g.neo[0], g.neo[1]);
+    return '<div class="sil"><div class="shape" data-p="' + cutHeight(d.area, p).toFixed(2) + '" role="img" aria-label="' + g.pt + ": " + nf.format(g.neo[0]) + " de " + nf.format(g.neo[1]) + " espécies com genoma (" + pf.format(p) + '%)" ' +
+      'style="width:' + Math.round(140 * d.w / d.h) + "px;aspect-ratio:" + d.w + "/" + d.h + ";-webkit-mask-image:url(" + d.uri + ");mask-image:url(" + d.uri + ')"></div>' +
+      '<div class="pct num" aria-hidden="true">' + pf.format(p) + '%</div><div class="lbl" aria-hidden="true">' + g.pt + '<br><span class="num">' + nf.format(g.neo[0]) + " de " + nf.format(g.neo[1]) + "</span></div></div>";
+  }).join("");
+  // enche as silhuetas depois do primeiro quadro (a transição de --p faz a animação; sem @property, aparece já cheia)
+  requestAnimationFrame(function () { requestAnimationFrame(function () {
+    Array.prototype.forEach.call(box.querySelectorAll(".shape"), function (el) { el.style.setProperty("--p", el.getAttribute("data-p") + "%"); });
+  }); });
+})();
+</script>
+</body>
+</html>
