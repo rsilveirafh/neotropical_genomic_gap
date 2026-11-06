@@ -37,6 +37,7 @@
   --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
   /* claro por padrão (as figuras do artigo têm fundo branco); o botão no topo troca para o escuro */
+  --text: 720px;
   color-scheme: light;
 }
 :root[data-theme="dark"] {
@@ -55,8 +56,10 @@ body {
   padding-right: max(16px, env(safe-area-inset-right, 0px));
   padding-block: 0 48px;
 }
+/* Regra de largura: todo texto numa coluna só (--text); gráficos e figuras usam a largura inteira (960 px), e suas legendas também */
 main { max-width: 960px; margin: 0 auto; display: grid; gap: 72px; }
-.prose { max-width: 68ch; }
+.prose { max-width: var(--text); }
+.hero h1, .cite-line, footer > * { max-width: var(--text); }
 h1, h2, h3 { font-family: var(--font-display); line-height: 1.12; text-wrap: balance; margin: 0; }
 h1 { font-size: clamp(2.2rem, 6vw, 3.6rem); font-weight: 800; letter-spacing: -0.02em; }
 h2 { font-size: clamp(1.6rem, 3.6vw, 2.2rem); font-weight: 700; letter-spacing: -0.01em; }
@@ -79,11 +82,11 @@ header.hero { padding-top: 48px; display: grid; gap: 22px; }
 }
 .theme-toggle:hover { border-color: var(--muted); }
 .theme-toggle svg { width: 15px; height: 15px; }
-.hero .lede { font-size: 1.25rem; max-width: 60ch; }
+.hero .lede { font-size: 1.25rem; max-width: var(--text); }
 .hero .lede strong { color: var(--accent); }
 /* Silhuetas: cada forma é uma máscara preenchida de baixo para cima até a cobertura do grupo */
 @property --p { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
-.sils-wrap { display: grid; gap: 16px; max-width: 720px; } /* mesma largura do texto de abertura, para as silhuetas ficarem centradas sob ele */
+.sils-wrap { display: grid; gap: 16px; max-width: var(--text); }
 .sils { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 28px; align-items: end; padding-top: 8px; }
 @media (max-width: 620px) { .sils { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 20px; } }
 .sil { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-width: 0; }
@@ -123,7 +126,7 @@ header.hero { padding-top: 48px; display: grid; gap: 22px; }
 .cmp-line .t i { position: absolute; inset: 0 auto 0 0; display: block; border-radius: 0 2px 2px 0; }
 .cmp-line .v { text-align: right; }
 .cmp-line.neo { font-weight: 700; }
-.note { font-size: 0.9rem; color: var(--muted); max-width: 68ch; }
+.note { font-size: 0.9rem; color: var(--muted); max-width: var(--text); }
 
 .levels { display: flex; height: 30px; border-radius: 4px; overflow: hidden; }
 .levels div { height: 100%; }
@@ -131,7 +134,9 @@ header.hero { padding-top: 48px; display: grid; gap: 22px; }
 /* Figuras */
 figure { margin: 0; display: grid; gap: 10px; }
 figure img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 4px; background: #fff; }
-figcaption { font-size: 0.92rem; color: var(--muted); max-width: 72ch; }
+/* legendas acompanham a largura da figura ou da tabela, não a coluna de texto */
+figcaption { font-size: 0.92rem; color: var(--muted); max-width: none; }
+caption.note { max-width: none; }
 figcaption b { color: var(--fg); }
 
 .countries { width: 100%; border-collapse: collapse; font-size: 0.92rem; }
@@ -143,7 +148,7 @@ figcaption b { color: var(--fg); }
 
 .list { display: grid; gap: 18px; margin: 0; padding: 0; list-style: none; }
 .list li { display: grid; gap: 4px; padding-left: 18px; border-left: 3px solid var(--accent-soft); }
-.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; }
+.two { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; max-width: var(--text); }
 
 footer { max-width: 960px; margin: 72px auto 0; padding-top: 28px; border-top: 1px solid var(--line); display: grid; gap: 14px; font-size: 0.95rem; }
 footer .ref { font-family: var(--font-body); }
