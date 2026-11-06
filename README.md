@@ -7,6 +7,10 @@ Code and data for the bioinformatic case study in:
 > evolutionary research in Tetrapoda.** *Genetics and Molecular Biology*.
 > doi:[10.1590/1678-4685-GMB-2025-0276](https://doi.org/10.1590/1678-4685-GMB-2025-0276)
 
+A plain-language summary of the article, in Portuguese and English, is at
+**[rsilveirafh.github.io/neotropical_genomic_gap](https://rsilveirafh.github.io/neotropical_genomic_gap/?lang=en)**
+(source in the `gh-pages` branch).
+
 ## What this is
 
 Genome sequencing has mostly benefited species from high-income regions, which leaves the

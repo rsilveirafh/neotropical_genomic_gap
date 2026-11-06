@@ -50,6 +50,8 @@ rsconnect/
 
 # Local only: manuscript drafts, journal proofs and working notes
 docs/
+# Outreach page drafts (the published page lives in the gh-pages branch)
+site/
 .planning/
 CLAUDE.md
 
