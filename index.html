@@ -64,7 +64,7 @@ header.hero { padding-top: 48px; display: grid; gap: 22px; }
 .hero .lede strong { color: var(--accent); }
 /* Silhuetas: cada forma é uma máscara preenchida de baixo para cima até a cobertura do grupo */
 @property --p { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
-.sils-wrap { display: grid; gap: 16px; }
+.sils-wrap { display: grid; gap: 16px; max-width: 720px; } /* mesma largura do texto de abertura, para as silhuetas ficarem centradas sob ele */
 .sils { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 28px; align-items: end; padding-top: 8px; }
 @media (max-width: 620px) { .sils { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 20px; } }
 .sil { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-width: 0; }
