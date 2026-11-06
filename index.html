@@ -32,22 +32,8 @@
   --font-display: "Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
   --font-body: "Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
   --font-data: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #0e1613; --surface: #17231e; --fg: #e3ece7; --muted: #9db2a8; --line: #2b3b34;
-    --accent: #3fc29f; --accent-soft: #1d3d33; --gap: #2a3832;
-    --europe: #a99ee0; --namerica: #e3a24a;
-    --chrom: #3fc29f; --scaf: #2f8a71; --contig: #1f5244;
-    color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #0e1613; --surface: #17231e; --fg: #e3ece7; --muted: #9db2a8; --line: #2b3b34;
-  --accent: #3fc29f; --accent-soft: #1d3d33; --gap: #2a3832;
-  --europe: #a99ee0; --namerica: #e3a24a;
-  --chrom: #3fc29f; --scaf: #2f8a71; --contig: #1f5244;
-  color-scheme: dark;
+  /* sempre claro, mesmo com o sistema no modo escuro: as figuras do artigo têm fundo branco */
+  color-scheme: light;
 }
 
 * { box-sizing: border-box; }
