@@ -100,11 +100,11 @@ header.hero { padding-top: 48px; display: grid; gap: 22px; }
 /* Silhuetas: cada forma é uma máscara preenchida de baixo para cima até a cobertura do grupo */
 @property --p { syntax: "<percentage>"; inherits: false; initial-value: 0%; }
 .sils-wrap { display: grid; gap: 16px; max-width: var(--text); }
-.sils { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; gap: 40px 48px; align-items: end; padding-top: 8px; }
+.sils { display: grid; grid-template-columns: repeat(3, minmax(0, 300px)); justify-content: start; gap: 40px 30px; align-items: end; padding-top: 8px; }
 @media (max-width: 620px) { .sils { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 20px; } }
 .sil { display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; min-width: 0; }
 .sil .shape {
-  max-width: min(100%, 300px); height: auto;
+  max-width: 100%; height: auto;
   -webkit-mask-size: contain; mask-size: contain; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
   -webkit-mask-position: center bottom; mask-position: center bottom;
   background: linear-gradient(to top, var(--accent) var(--p), var(--gap) var(--p));
